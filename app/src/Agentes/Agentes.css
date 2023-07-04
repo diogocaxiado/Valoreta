@@ -1,0 +1,23 @@
+* {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+}
+
+.agentes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-agent img{
+    width: 75px;
+    margin: 10px;
+
+    cursor: pointer;
+}
+
+.card-agent img:hover {
+    margin-top: 1px;
+}
