@@ -2,7 +2,7 @@ import Agentes from '../Agentes/Agentes';
 import './Dashboard.css';
 import { useEffect, useState } from "react";
   
-function Dashboard() {
+export default function Dashboard() {
 
     const [agents, setAgents] = useState([]);
 
@@ -11,19 +11,16 @@ function Dashboard() {
         .then(response => response.json())
         .then(data => {setAgents(data.data)});
     }, []);
-    
-    
+
     return (
     <div className="Dashboard">
         <div className="layout-agent">
-            {agents.map(function(agent) {
+            {agents.map((agent) => { 
                 return (
-                    <Agentes key={agent.uuid} imgAgente={agent.displayIcon} />
+                    <Agentes key={agent.uuid} imgAgent={agent.displayIcon} />
                 )
             })}
         </div>
     </div>
     )
 }
-
-export default Dashboard;

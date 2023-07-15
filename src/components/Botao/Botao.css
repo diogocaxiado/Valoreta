@@ -1,0 +1,32 @@
+* {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+}
+
+.botao-roleta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.botao-roleta button {
+    padding: 15px 50px;
+    cursor: pointer;
+    
+    border: 1px solid black;
+    border-radius: 10px;
+
+    font-size: 18px;
+    font-weight: 500;
+    text-transform: uppercase;
+
+    color: aqua;
+    background-color: #FF4655;
+}
+
+.botao-roleta button:hover {
+    background-color: rgba(255, 70, 86, 0.85);
+}
+

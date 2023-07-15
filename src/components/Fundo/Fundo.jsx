@@ -1,7 +1,7 @@
 import './Fundo.css';
-import ValorantScreen from '../assets/video/Valorant.mp4'
+import ValorantScreen from '../../assets/video/Valorant.mp4';
 
-function Fundo() {
+export default function Fundo() {
     return (
     <div className="Fundo">
         <video autoPlay loop muted>
@@ -10,5 +10,3 @@ function Fundo() {
     </div>
     )
 }
-
-export default Fundo

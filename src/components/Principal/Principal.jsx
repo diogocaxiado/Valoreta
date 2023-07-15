@@ -1,6 +1,6 @@
 import './Principal.css';
 
-function Principal() {
+export default function Principal() {
     return (
         <section className="layout-pagina">
             <div className="pagina-inicial">
@@ -13,5 +13,3 @@ function Principal() {
         </section>
     )
 }
-
-export default Principal;
