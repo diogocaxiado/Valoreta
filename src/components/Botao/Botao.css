@@ -12,10 +12,10 @@
 }
 
 .botao-roleta button {
-    padding: 15px 50px;
+    padding: 10px 50px;
     cursor: pointer;
     
-    border: 1px solid black;
+    border: 1.5px solid black;
     border-radius: 10px;
 
     font-size: 18px;
@@ -27,6 +27,6 @@
 }
 
 .botao-roleta button:hover {
-    background-color: rgba(255, 70, 86, 0.85);
+    transform: scale(1.02);
 }
 

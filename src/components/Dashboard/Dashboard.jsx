@@ -1,23 +1,21 @@
-import Agentes from '../Agentes/Agentes';
 import './Dashboard.css';
-import { useEffect, useState } from "react";
   
-export default function Dashboard() {
-
-    const [agents, setAgents] = useState([]);
-
-    useEffect(() => {
-        fetch("https://valorant-api.com/v1/agents?isPlayableCharacter=true")
-        .then(response => response.json())
-        .then(data => {setAgents(data.data)});
-    }, []);
-
+export default function Dashboard({agents, randomAgent}) {
     return (
     <div className="Dashboard">
         <div className="layout-agent">
             {agents.map((agent) => { 
+
+                let variavel = (randomAgent == agent.uuid ? "card-agent-random" : "card-agent-opacity");
+
+                if (!randomAgent) {
+                    variavel = "card-agent";    
+                }
+
                 return (
-                    <Agentes key={agent.uuid} imgAgent={agent.displayIcon} />
+                    <section key={agent.uuid} className={variavel}>
+                        <img src={agent.displayIcon} alt="icone do agente" />
+                    </section>
                 )
             })}
         </div>
