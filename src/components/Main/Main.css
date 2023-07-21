@@ -1,0 +1,35 @@
+.page-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  z-index: 2;
+  margin: 50px 0;
+  padding: 50px;
+
+  height: 330px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.page-section {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.title {
+  font-size: 50px;
+  text-align: center;
+
+  color: whitesmoke;
+}
+
+.description {
+  width: 1080px;
+
+  text-align: center;
+  font-size: 22px;
+
+  color: white;
+}

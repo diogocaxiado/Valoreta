@@ -1,0 +1,58 @@
+.Card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  z-index: 2;
+}
+
+.layout-agent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  width: 1080px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+
+  border: 5px double rgba(250, 250, 250, 0.35);
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.card-agent:hover {
+  transition: all ease-in-out 1ms;
+  transform: scale(1.05);
+}
+
+.card-agent img {
+  width: 85px;
+  padding: 5px;
+
+  cursor: pointer;
+  border: 2px inset rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.card-agent-opacity img {
+  width: 85px;
+  padding: 5px;
+
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.5;
+}
+
+.card-agent-random img {
+  width: 85px;
+
+  cursor: pointer;
+  border: 2px solid rgba(30, 255, 60, 1);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.variavel {
+  position: relative;
+}

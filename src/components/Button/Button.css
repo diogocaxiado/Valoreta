@@ -1,0 +1,27 @@
+.randomize-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  z-index: 2;
+}
+
+.randomize-button button {
+  padding: 10px 50px;
+  cursor: pointer;
+
+  border: 1.5px solid black;
+  border-radius: 10px;
+
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+
+  color: aqua;
+  background-color: #ff4655;
+}
+
+.randomize-button button:hover {
+  transform: scale(1.02);
+}
