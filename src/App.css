@@ -5,13 +5,6 @@
   padding: 0;
 }
 
-@font-face {
-  font-family: "Valorant";
-  src: url("Valorant Font.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-
 body {
   font-family: "Prompt", sans-serif;
   overflow: hidden;

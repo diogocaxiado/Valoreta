@@ -36,9 +36,8 @@ function App() {
       <Background />
 
       <main className="content">
-        {randomAgent ? (
-          <BackgroundAgent backgroundUrl={getAgentData("bustPortrait")} />
-        ) : null}
+        {randomAgent ? <BackgroundAgent getAgentData={getAgentData} /> : null}
+
         <Main getAgentData={getAgentData} randomAgent={randomAgent} />
         <Card agents={agents} randomAgent={randomAgent} />
         <Button handleClick={handleClick} />

@@ -1,7 +1,21 @@
-.agent-body {
+.agent {
   display: flex;
   justify-content: center;
+}
 
+.background-agent {
+  position: absolute;
+  z-index: 1;
+
+  left: 0;
+  right: 0;
+  bottom: 5px;
+  margin: 0 auto;
+
+  width: 650px;
+}
+
+.agent-body {
   position: absolute;
   z-index: 1;
 
