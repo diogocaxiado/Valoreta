@@ -3,7 +3,7 @@
   justify-content: center;
 }
 
-.border-background-agent {
+.border-class {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,17 +12,18 @@
   z-index: 1;
 
   top: 50px;
-  left: 25px;
-  width: 250px;
+  left: 100px;
+  width: 215px;
   height: 200px;
 
-  border-radius: 15%;
   border: 2px solid rgba(33, 176, 208, 0.15);
-  background-color: rgba(33, 176, 208, 0.1);
+  border-radius: 50%;
   box-shadow: -10px -5px 30px black;
+
+  background-color: rgba(33, 176, 208, 0.1);
 }
 
-.background-agent {
+.icon-class {
   position: absolute;
   z-index: 1;
 
@@ -34,7 +35,5 @@
   z-index: 1;
 
   bottom: 5px;
-  margin: 0 auto;
-
   width: 1080px;
 }

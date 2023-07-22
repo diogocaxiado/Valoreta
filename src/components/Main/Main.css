@@ -5,10 +5,11 @@
 
   position: relative;
   z-index: 2;
+
+  height: 330px;
   margin: 50px 0;
   padding: 50px;
 
-  height: 330px;
   background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -19,10 +20,12 @@
 
   position: relative;
   z-index: 2;
+
+  height: 330px;
   margin: 50px 0;
   padding: 50px;
 
-  height: 330px;
+  transition: all 400ms ease-in-out;
 }
 
 .page-section {
@@ -31,18 +34,16 @@
   gap: 50px;
 }
 
-.title {
+.page-section h2 {
   font-size: 50px;
   text-align: center;
 
   color: whitesmoke;
 }
 
-.description {
-  width: 1080px;
-
+.page-section p {
   text-align: center;
   font-size: 22px;
 
-  color: white;
+  color: aqua;
 }
