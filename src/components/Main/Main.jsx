@@ -1,18 +1,14 @@
 import "./Main.css";
 
-export default function Main({ getAgentData, randomAgent }) {
+export default function Main({ randomAgent }) {
   return (
-    <div className="page-layout">
+    <div className={randomAgent ? "page-layout-agent" : "page-layout"}>
       <section className="page-section">
         <h2 className="title">
-          {randomAgent
-            ? getAgentData("displayName")
-            : "Bem vindo ao Valorant Roleta"}
+          {randomAgent ? null : "Bem vindo ao Valorant Roleta"}
         </h2>
         <p className="description">
-          {randomAgent
-            ? getAgentData("description")
-            : "Está com dúvida no que jogar? Clique no botão"}
+          {randomAgent ? null : "Está com dúvida no que jogar? Clique no botão"}
         </p>
       </section>
     </div>

@@ -1,9 +1,11 @@
 import "./BackgroundAgent.css";
 
-export default function BackgroundAgent({ getAgentData }) {
+export default function BackgroundAgent({ getAgentData, getAgentClass }) {
   return (
     <div className="agent">
-      <img className="background-agent" src={getAgentData("background")} />
+      <div className="border-background-agent">
+        <img className="background-agent" src={getAgentClass()} />
+      </div>
       <img
         className="agent-body"
         src={getAgentData("fullPortrait")}

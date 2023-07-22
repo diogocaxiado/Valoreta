@@ -3,24 +3,36 @@
   justify-content: center;
 }
 
+.border-background-agent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: absolute;
+  z-index: 1;
+
+  top: 50px;
+  left: 25px;
+  width: 250px;
+  height: 200px;
+
+  border-radius: 15%;
+  border: 2px solid rgba(33, 176, 208, 0.15);
+  background-color: rgba(33, 176, 208, 0.1);
+  box-shadow: -10px -5px 30px black;
+}
+
 .background-agent {
   position: absolute;
   z-index: 1;
 
-  left: 0;
-  right: 0;
-  bottom: 5px;
-  margin: 0 auto;
-
-  width: 650px;
+  width: 100px;
 }
 
 .agent-body {
   position: absolute;
   z-index: 1;
 
-  left: 0;
-  right: 0;
   bottom: 5px;
   margin: 0 auto;
 
