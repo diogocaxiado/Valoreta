@@ -1,12 +1,12 @@
 import "./App.css";
 import { useState } from "react";
+import useCallAgents from "./hooks/useCallAgents";
 import Background from "./components/Background/Background";
 import Main from "./components/Main/Main";
 import Card from "./components/Card/Card";
 import Button from "./components/Button/Button";
-import BackgroundAgent from "./components/BackgroundAgent/BackgroundAgent";
-import Select from "./components/Select/Select";
-import useCallAgents from "./hooks/useCallAgents";
+import BackgroundAgent from "./components/PortraitAgent/PortraitAgent";
+import Overview from "./components/Overview/Overview";
 
 function App() {
   const [randomAgent, setRandomAgent] = useState("");
@@ -15,7 +15,6 @@ function App() {
   function handleClick() {
     const random = Math.floor(Math.random() * (agents.length - 1));
     setRandomAgent(agents[random].uuid);
-    setAgents(agents);
   }
 
   function getAgentData(property) {
@@ -23,9 +22,9 @@ function App() {
     return result[property];
   }
 
-  function getAgentClass() {
+  function getAgentClass(property) {
     const result = agents.find((agent) => agent.uuid === randomAgent);
-    return result.role.displayIcon;
+    return result.role[property];
   }
 
   return (
@@ -39,7 +38,9 @@ function App() {
             getAgentClass={getAgentClass}
           />
         ) : null}
-        {randomAgent ? <Select getAgentData={getAgentData} /> : null}
+        {randomAgent ? (
+          <Overview getAgentData={getAgentData} getAgentClass={getAgentClass} />
+        ) : null}
 
         <Main randomAgent={randomAgent} />
         {agents && <Card agents={agents} randomAgent={randomAgent} />}

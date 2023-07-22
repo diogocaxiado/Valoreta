@@ -1,0 +1,61 @@
+.overview-agent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  position: absolute;
+  top: 20px;
+  right: 80px;
+
+  width: 550px;
+  height: 500px;
+
+  padding: 35px;
+
+  border-radius: 10%;
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.agent-class {
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.agent-name {
+  margin: 0 20px;
+
+  font-size: 60px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+
+  color: rgb(227, 227, 143);
+}
+
+.agent-info {
+  word-wrap: break-word;
+
+  width: 500px;
+
+  font-size: 16px;
+  text-align: left;
+
+  color: rgb(227, 227, 200);
+}
+
+.name-class {
+  font-size: 26px;
+  text-transform: uppercase;
+}
+
+.info-class {
+  width: 500px;
+
+  font-size: 16px;
+  text-align: left;
+
+  color: rgb(227, 227, 200);
+}
