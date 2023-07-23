@@ -8,7 +8,6 @@
 
   height: 330px;
   margin: 50px 0;
-  padding: 50px;
 
   background-color: rgba(0, 0, 0, 0.5);
 }
@@ -19,11 +18,10 @@
   align-items: center;
 
   position: relative;
-  z-index: 2;
+  z-index: 1;
 
-  height: 330px;
+  height: 300px;
   margin: 50px 0;
-  padding: 50px;
 
   transition: all 400ms ease-in-out;
 }
@@ -31,19 +29,32 @@
 .page-section {
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  align-items: center;
+  gap: 20px;
 }
 
-.page-section h2 {
+.page-image {
+  position: absolute;
+  top: 15px;
+  opacity: 0;
+
+  opacity: 0.5;
+
+  width: 350px;
+}
+
+.page-title {
   font-size: 50px;
   text-align: center;
+  z-index: 1;
 
-  color: whitesmoke;
+  color: rgb(227, 227, 143);
 }
 
-.page-section p {
+.page-description {
   text-align: center;
   font-size: 22px;
+  z-index: 1;
 
   color: aqua;
 }

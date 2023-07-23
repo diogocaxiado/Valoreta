@@ -2,7 +2,7 @@ import "./App.css";
 import { useState } from "react";
 import useCallAgents from "./hooks/useCallAgents";
 import Background from "./components/Background/Background";
-import Main from "./components/Main/Main";
+import Message from "./components/Message/Message";
 import Card from "./components/Card/Card";
 import Button from "./components/Button/Button";
 import BackgroundAgent from "./components/PortraitAgent/PortraitAgent";
@@ -42,7 +42,7 @@ function App() {
           <Overview getAgentData={getAgentData} getAgentClass={getAgentClass} />
         ) : null}
 
-        <Main randomAgent={randomAgent} />
+        <Message randomAgent={randomAgent} />
         {agents && <Card agents={agents} randomAgent={randomAgent} />}
         <Button handleClick={handleClick} />
       </main>
