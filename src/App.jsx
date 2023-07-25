@@ -3,18 +3,23 @@ import { useState } from "react";
 import useCallAgents from "./hooks/useCallAgents";
 import Background from "./components/Background/Background";
 import Message from "./components/Message/Message";
-import Card from "./components/Card/Card";
+import CardAgents from "./components/CardAgents/CardAgents";
 import Button from "./components/Button/Button";
 import BackgroundAgent from "./components/PortraitAgent/PortraitAgent";
 import Overview from "./components/Overview/Overview";
 
 function App() {
   const [randomAgent, setRandomAgent] = useState("");
+  const [abilities, setAbilities] = useState([]);
   const { agents, isLoading } = useCallAgents();
 
-  function handleClick() {
+  function handleClickButton() {
     const random = Math.floor(Math.random() * (agents.length - 1));
     setRandomAgent(agents[random].uuid);
+  }
+
+  function handleClickAgent() {
+    setRandomAgent("");
   }
 
   function getAgentData(property) {
@@ -25,6 +30,11 @@ function App() {
   function getAgentClass(property) {
     const result = agents.find((agent) => agent.uuid === randomAgent);
     return result.role[property];
+  }
+
+  function getAgentAbilities() {
+    const result = agents.find((agent) => agent.uuid === randomAgent);
+    setAbilities(result.abilities);
   }
 
   return (
@@ -39,12 +49,25 @@ function App() {
           />
         ) : null}
         {randomAgent ? (
-          <Overview getAgentData={getAgentData} getAgentClass={getAgentClass} />
+          <Overview
+            getAgentData={getAgentData}
+            getAgentClass={getAgentClass}
+            abilities={abilities}
+          />
         ) : null}
 
-        <Message randomAgent={randomAgent} />
-        {agents && <Card agents={agents} randomAgent={randomAgent} />}
-        <Button handleClick={handleClick} />
+        <Message
+          randomAgent={randomAgent}
+          getAgentAbilities={getAgentAbilities}
+        />
+        <Button handleClickButton={handleClickButton} />
+        {agents && (
+          <CardAgents
+            agents={agents}
+            randomAgent={randomAgent}
+            handleClickAgent={handleClickAgent}
+          />
+        )}
       </main>
     </>
   );

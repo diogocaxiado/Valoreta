@@ -5,7 +5,13 @@
   padding: 0;
 }
 
+@font-face {
+  font-family: "Tungsten-Font";
+  src: url("../public/Tungsten-Bold.ttf") format("opentype");
+}
+
 body {
+  font-family: "Tungsten-Font";
   font-family: "Prompt", sans-serif;
   overflow: hidden;
 }
