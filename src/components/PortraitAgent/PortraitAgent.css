@@ -3,7 +3,7 @@
   justify-content: center;
 }
 
-.border-class {
+.class-border {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,7 +23,7 @@
   background-color: rgba(33, 176, 208, 0.1);
 }
 
-.icon-class {
+.class-icon {
   position: absolute;
   z-index: 1;
 

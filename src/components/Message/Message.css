@@ -6,10 +6,11 @@
   position: relative;
   z-index: 2;
 
-  height: 330px;
+  height: 430px;
   margin: 50px 0;
 
   background-color: rgba(0, 0, 0, 0.5);
+  transition: all 400ms ease-in-out;
 }
 
 .page-layout-agent {
@@ -17,10 +18,9 @@
   justify-content: center;
   align-items: center;
 
-  position: relative;
-  z-index: 1;
+  z-index: 2;
 
-  height: 300px;
+  height: 400px;
   margin: 50px 0;
 
   transition: all 400ms ease-in-out;
@@ -40,11 +40,11 @@
 
   opacity: 0.5;
 
-  width: 350px;
+  width: 450px;
 }
 
 .page-title {
-  font-size: 50px;
+  font-size: 4rem;
   text-align: center;
   z-index: 1;
 
@@ -53,7 +53,7 @@
 
 .page-description {
   text-align: center;
-  font-size: 22px;
+  font-size: 1.5rem;
   z-index: 1;
 
   color: aqua;
