@@ -1,14 +1,13 @@
 .overview-agent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 
   position: absolute;
-  top: 20px;
+  top: 15px;
   right: 80px;
 
   width: 550px;
-  height: 500px;
+  height: 620px;
 
   padding: 35px;
 
@@ -18,44 +17,58 @@
 }
 
 .agent-class {
-  font-size: 20px;
-  font-weight: 500;
+  font-family: Tungsten-Font;
+  font-size: 1.6rem;
   text-transform: uppercase;
   letter-spacing: 4px;
 }
 
 .agent-name {
-  margin: 0 20px;
-
-  font-size: 60px;
-  font-weight: 700;
+  font-family: Tungsten-Font;
+  font-size: 8.2rem;
   text-transform: uppercase;
   letter-spacing: 2px;
+  line-height: 1;
 
   color: rgb(227, 227, 143);
+}
+
+.card-abilities {
+  display: flex;
+  gap: 2px;
+
+  margin: 20px 0;
+  cursor: pointer;
 }
 
 .agent-info {
   word-wrap: break-word;
 
   width: 500px;
+  margin: 5px 0;
 
-  font-size: 16px;
-  text-align: left;
+  font-family: Prompt;
+  font-size: 1rem;
+  font-weight: 600;
 
   color: rgb(227, 227, 200);
 }
 
 .name-class {
-  font-size: 26px;
+  font-family: Tungsten-Font;
+  font-size: 2.2rem;
   text-transform: uppercase;
+  letter-spacing: 1px;
+
+  color: white;
 }
 
-.info-class {
+.class-info {
   width: 500px;
 
-  font-size: 16px;
+  font-family: Prompt;
+  font-size: 1rem;
   text-align: left;
 
-  color: rgb(227, 227, 200);
+  color: white;
 }
