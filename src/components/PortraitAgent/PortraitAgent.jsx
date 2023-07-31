@@ -2,7 +2,7 @@ import "./PortraitAgent.css";
 
 export default function BackgroundAgent({ getAgentData, getAgentClass }) {
   return (
-    <div className="agent">
+    <section className="agent">
       <div className="class-border">
         <img
           className="class-icon"
@@ -15,6 +15,6 @@ export default function BackgroundAgent({ getAgentData, getAgentClass }) {
         src={getAgentData("fullPortrait")}
         alt="agent photo"
       />
-    </div>
+    </section>
   );
 }
