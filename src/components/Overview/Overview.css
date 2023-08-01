@@ -1,14 +1,14 @@
 .overview-agent {
   display: flex;
   flex-direction: column;
+  z-index: 3;
 
   position: absolute;
   top: 15px;
   right: 80px;
 
   width: 550px;
-  height: 620px;
-
+  height: 650px;
   padding: 35px;
 
   border-radius: 10%;
@@ -38,7 +38,6 @@
   gap: 2px;
 
   margin: 20px 0;
-  cursor: pointer;
 }
 
 .agent-info {

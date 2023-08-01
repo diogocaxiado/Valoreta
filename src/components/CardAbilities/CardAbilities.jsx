@@ -1,9 +1,9 @@
 import "./CardAbilities.css";
 
-export default function CardAbilities({ name, src, alt }) {
+export default function CardAbilities({ name, src, alt, handle }) {
   return (
-    <section className="abilities">
-      <div className="abilities-name">
+    <section className="abilities-box" key={name}>
+      <div className="abilities-name" onClick={() => handle(name)}>
         <strong>{name}</strong>
       </div>
 

@@ -11,11 +11,14 @@ import Overview from "./components/Overview/Overview";
 function App() {
   const [randomAgent, setRandomAgent] = useState("");
   const [abilities, setAbilities] = useState([]);
+  const [descriptionAbility, setDescriptionAbility] = useState("");
   const { agents, isLoading } = useCallAgents();
 
   function handleClickButton() {
     const random = Math.floor(Math.random() * (agents.length - 1));
     setRandomAgent(agents[random].uuid);
+    getAgentAbilities(agents[random].uuid);
+    setDescriptionAbility("");
   }
 
   function handleClickAgent() {
@@ -32,35 +35,39 @@ function App() {
     return result.role[property];
   }
 
-  function getAgentAbilities() {
-    const result = agents.find((agent) => agent.uuid === randomAgent);
+  function getAgentAbilities(randomA) {
+    const result = agents.find((agent) => agent.uuid === randomA);
     setAbilities(result.abilities);
   }
 
   return (
     <>
-      <Background />
-
       <main className="content">
-        {randomAgent ? (
+        <Background />
+
+        {randomAgent && (
           <BackgroundAgent
             getAgentData={getAgentData}
             getAgentClass={getAgentClass}
           />
-        ) : null}
-        {randomAgent ? (
+        )}
+        {randomAgent && (
           <Overview
             getAgentData={getAgentData}
             getAgentClass={getAgentClass}
             abilities={abilities}
+            descriptionAbility={descriptionAbility}
+            setDescriptionAbility={setDescriptionAbility}
           />
-        ) : null}
+        )}
 
         <Message
           randomAgent={randomAgent}
           getAgentAbilities={getAgentAbilities}
         />
+
         <Button handleClickButton={handleClickButton} />
+
         {agents && (
           <CardAgents
             agents={agents}
