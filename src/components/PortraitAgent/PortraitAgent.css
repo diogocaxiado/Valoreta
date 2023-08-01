@@ -9,7 +9,7 @@
   align-items: center;
 
   position: absolute;
-  z-index: 1;
+  z-index: 2;
 
   top: 50px;
   left: 100px;
@@ -23,16 +23,9 @@
   background-color: rgba(33, 176, 208, 0.1);
 }
 
-.class-icon {
-  position: absolute;
-  z-index: 1;
-
-  width: 100px;
-}
-
 .agent-body {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
 
   bottom: 5px;
   width: 1080px;
