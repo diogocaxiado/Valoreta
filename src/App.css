@@ -7,7 +7,7 @@
 
 @font-face {
   font-family: "Tungsten-Font";
-  src: url("../public/Tungsten-Bold.ttf") format("opentype");
+  src: url("/Tungsten-Bold.ttf") format("opentype");
 }
 
 body {
