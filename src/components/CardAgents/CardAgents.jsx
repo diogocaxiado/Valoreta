@@ -1,9 +1,9 @@
-import "./CardAgents.css";
+import "./CardAgents.scss";
 
 export default function CardAgents({ agents, randomAgent, handleClickAgent }) {
   return (
     <section className="card">
-      <div className="layout-agent">
+      <div className="card-layout">
         {agents.map((agent) => {
           let variavel =
             randomAgent === agent.uuid

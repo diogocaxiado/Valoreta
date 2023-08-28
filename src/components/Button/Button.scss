@@ -1,0 +1,29 @@
+.randomize {
+  &-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    z-index: 2;
+  }
+
+  &-button {
+    padding: 10px 50px;
+    cursor: pointer;
+
+    border: none;
+
+    font-family: Prompt;
+    font-size: 20px;
+    text-transform: uppercase;
+
+    color: white;
+    background-color: #55996e;
+
+    &:hover {
+      opacity: 0.8;
+      transition: all 400ms ease-in;
+    }
+  }
+}

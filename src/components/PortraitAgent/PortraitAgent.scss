@@ -1,0 +1,32 @@
+.class {
+  &-agent {
+    display: flex;
+    justify-content: center;
+  }
+
+  &-border {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    z-index: 2;
+    top: 4%;
+    left: 4%;
+
+    width: 20%;
+    opacity: 0.6;
+  }
+
+  &-icon {
+    width: 100%;
+  }
+
+  &-agent-body {
+    position: absolute;
+    z-index: 2;
+
+    bottom: 0;
+    width: 58%;
+  }
+}

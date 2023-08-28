@@ -1,10 +1,15 @@
-import "./Button.css";
+import "./Button.scss";
 
 export default function Button({ handleClickButton }) {
   return (
     <>
-      <section className="randomize-button">
-        <button onClick={() => handleClickButton()}>Rodar</button>
+      <section className="randomize-container">
+        <button
+          className="randomize-button"
+          onClick={() => handleClickButton()}
+        >
+          Rodar
+        </button>
       </section>
     </>
   );

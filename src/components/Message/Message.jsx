@@ -1,4 +1,4 @@
-import "./Message.css";
+import "./Message.scss";
 import Image from "../../assets/image/Valorant-Icon.png";
 
 export default function Message({ randomAgent }) {

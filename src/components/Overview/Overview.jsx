@@ -1,4 +1,4 @@
-import "./Overview.css";
+import "./Overview.scss";
 import CardAbilities from "../CardAbilities/CardAbilities";
 
 export default function Overview({
@@ -8,7 +8,7 @@ export default function Overview({
   descriptionAbility,
   setDescriptionAbility,
 }) {
-  function handleClickDescription(prop) {
+  function handleClickDescriptionAbilitie(prop) {
     const result = abilities.find((abilitie) => abilitie.slot === prop);
     setDescriptionAbility(result);
   }
@@ -18,11 +18,13 @@ export default function Overview({
   }
 
   return (
-    <section className="overview-agent">
-      <strong className="agent-class">{getAgentClass("displayName")}</strong>
-      <h2 className="agent-name">{getAgentData("displayName")}</h2>
+    <section className="overview-container">
+      <strong className="overview-agent-class">
+        {getAgentClass("displayName")}
+      </strong>
+      <h2 className="overview-agent-name">{getAgentData("displayName")}</h2>
 
-      <div className="card-abilities">
+      <div className="overview-agent-abilities">
         <CardAbilities
           name={"INFO"}
           src={getAgentClass("displayIcon")}
@@ -38,19 +40,21 @@ export default function Overview({
                 name={abilitie.slot}
                 src={abilitie.displayIcon}
                 alt={abilitie.displayName}
-                handle={handleClickDescription}
+                handle={handleClickDescriptionAbilitie}
               />
             )
         )}
       </div>
-      <p className="agent-info">
+      <p className="overview-agent-info">
         {descriptionAbility !== ""
           ? descriptionAbility.description
           : getAgentClass("description")}
       </p>
 
-      <strong className="name-class">{getAgentClass("displayName")}</strong>
-      <p className="class-info">{getAgentClass("description")}</p>
+      <strong className="overview-class-name">
+        {getAgentClass("displayName")}
+      </strong>
+      <p className="overview-class-info">{getAgentClass("description")}</p>
     </section>
   );
 }

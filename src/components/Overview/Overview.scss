@@ -1,0 +1,73 @@
+.overview {
+  &-container {
+    display: flex;
+    flex-direction: column;
+    z-index: 3;
+
+    position: absolute;
+    top: 15px;
+    right: 40px;
+
+    width: 550px;
+    height: 64%;
+    padding: 35px;
+  }
+
+  &-agent {
+    &-class {
+      font-family: Tungsten-Font;
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    &-name {
+      font-family: Tungsten-Font;
+      font-size: 8.2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      line-height: 1;
+
+      color: rgb(227, 227, 143);
+    }
+
+    &-abilities {
+      display: flex;
+      gap: 2px;
+
+      margin: 20px 0;
+    }
+
+    &-info {
+      word-wrap: break-word;
+
+      width: 100%;
+      margin: 5px 0;
+
+      font-family: Prompt;
+      font-size: 1rem;
+      font-weight: 600;
+
+      color: rgb(227, 227, 200);
+    }
+  }
+
+  &-class-name {
+    font-family: Tungsten-Font;
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    color: white;
+  }
+
+  &-class-info {
+    width: 100%;
+
+    font-family: Prompt;
+    font-size: 1rem;
+    text-align: left;
+
+    color: white;
+  }
+}

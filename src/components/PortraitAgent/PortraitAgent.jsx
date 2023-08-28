@@ -1,17 +1,17 @@
-import "./PortraitAgent.css";
+import "./PortraitAgent.scss";
 
 export default function BackgroundAgent({ getAgentData, getAgentClass }) {
   return (
-    <section className="agent">
+    <section className="class-agent">
       <div className="class-border">
         <img
           className="class-icon"
           alt="agent class"
-          src={getAgentClass("displayIcon")}
+          src={getAgentData("background")}
         />
       </div>
       <img
-        className={"agent-body"}
+        className={"class-agent-body"}
         src={getAgentData("fullPortrait")}
         alt="agent photo"
       />

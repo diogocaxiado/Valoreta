@@ -1,0 +1,62 @@
+.page {
+  &-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    z-index: 2;
+
+    height: 450px;
+    margin: 50px 0;
+
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all 400ms ease-in-out;
+  }
+
+  &-layout-agent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 2;
+
+    height: 430px;
+    margin: 50px 0;
+
+    transition: all 400ms ease-in-out;
+  }
+
+  &-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  &-image {
+    position: absolute;
+    top: 15px;
+    opacity: 0;
+
+    opacity: 0.5;
+
+    width: 450px;
+  }
+
+  &-title {
+    font-size: 4rem;
+    text-align: center;
+    z-index: 1;
+
+    color: rgb(227, 227, 143);
+  }
+
+  &-description {
+    text-align: center;
+    font-size: 1.5rem;
+    z-index: 1;
+
+    color: aqua;
+  }
+}
