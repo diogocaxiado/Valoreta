@@ -1,4 +1,3 @@
-import "./CardAbilities.scss";
 
 interface CardAbilitiesProps {
   name: string;
@@ -9,12 +8,12 @@ interface CardAbilitiesProps {
 
 export default function CardAbilities({ name, src, alt, handle }: CardAbilitiesProps) {
   return (
-    <section className="abilities-box" key={name}>
-      <div className="abilities-name" onClick={() => handle(name)}>
-        <strong className="abilities-strong">{name}</strong>
+    <section className="flex flex-col items-center z-20 w-full bg-white/30" key={name}>
+      <div className="flex justify-center items-center cursor-pointer h-8 w-full border-b-2 border-white/30 hover:bg-valorant-cyan hover:text-black" onClick={() => handle(name)}>
+        <strong className="font-prompt text-sm text-center uppercase">{name}</strong>
       </div>
 
-      <img className="abilities-img" src={src} alt={alt} />
+      <img className="w-14 p-2.5" src={src} alt={alt} />
     </section>
   );
 }

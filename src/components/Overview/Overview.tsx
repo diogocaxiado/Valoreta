@@ -1,4 +1,3 @@
-import "./Overview.scss";
 import CardAbilities from "../CardAbilities/CardAbilities";
 import { Dispatch, SetStateAction } from "react";
 
@@ -27,13 +26,13 @@ export default function Overview({
   }
 
   return (
-    <section className="overview-container">
-      <strong className="overview-agent-class">
+    <section className="flex flex-col z-20 absolute top-4 right-10 w-96 h-3/5 p-8">
+      <strong className="font-tungsten text-2xl uppercase tracking-widest">
         {getAgentClass("displayName")}
       </strong>
-      <h2 className="overview-agent-name">{getAgentData("displayName")}</h2>
+      <h2 className="font-tungsten text-8xl uppercase tracking-wide leading-none text-valorant-yellow">{getAgentData("displayName")}</h2>
 
-      <div className="overview-agent-abilities">
+      <div className="flex gap-0.5 my-5">
         <CardAbilities
           name={"INFO"}
           src={getAgentClass("displayIcon")}
@@ -54,16 +53,16 @@ export default function Overview({
             )
         )}
       </div>
-      <p className="overview-agent-info">
+      <p className="break-words w-full my-1 font-prompt text-base font-semibold text-valorant-light">
         {descriptionAbility !== ""
           ? descriptionAbility.description
           : getAgentClass("description")}
       </p>
 
-      <strong className="overview-class-name">
+      <strong className="font-tungsten text-3xl uppercase tracking-wide text-white">
         {getAgentClass("displayName")}
       </strong>
-      <p className="overview-class-info">{getAgentClass("description")}</p>
+      <p className="w-full font-prompt text-base text-left text-white">{getAgentClass("description")}</p>
     </section>
   );
 }

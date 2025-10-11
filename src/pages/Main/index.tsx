@@ -8,7 +8,6 @@ import BackgroundAgent from "../../components/PortraitAgent/PortraitAgent";
 import Overview from "../../components/Overview/Overview";
 
 import { AgentsType } from "../../types";
-import styles from "./style.module.scss";
 
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
@@ -66,7 +65,7 @@ const App = () => {
 
   return (
     <>
-      <main className={styles.content}>
+      <main className="flex flex-col justify-center w-screen h-screen">
         <Background />
 
         {randomAgent && (
