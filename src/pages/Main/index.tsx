@@ -7,7 +7,7 @@ import Button from "../../components/Button/Button";
 import BackgroundAgent from "../../components/PortraitAgent/PortraitAgent";
 import Overview from "../../components/Overview/Overview";
 
-import { AgentsType } from "../../types";
+import { IAgent } from "../../types";
 
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
@@ -17,7 +17,7 @@ const App = () => {
     data: agents,
     isLoading,
     error,
-  } = useCallApi<AgentsType[]>({
+  } = useCallApi<IAgent[]>({
     endpoint: "agents",
     filters: {
       isPlayableCharacter: true,
@@ -38,20 +38,20 @@ const App = () => {
 
   function getAgentData(property: string) {
     const result = agents?.find(
-      (agent: AgentsType) => agent.uuid === randomAgent
+      (agent: IAgent) => agent.uuid === randomAgent
     );
     return result[property];
   }
 
   function getAgentClass(property: string) {
     const result = agents?.find(
-      (agent: AgentsType) => agent.uuid === randomAgent
+      (agent: IAgent) => agent.uuid === randomAgent
     );
     return result.role[property];
   }
 
   function getAgentAbilities(randomA: string) {
-    const result = agents?.find((agent: AgentsType) => agent.uuid === randomA);
+    const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
     setAbilities(result.abilities);
   }
 

@@ -1,4 +1,4 @@
-export interface AgentsType {
+export interface IAgent {
     uuid: string;
     displayName: string;
     description: string;
@@ -25,11 +25,11 @@ export interface AgentsType {
       assetPath: string;
     }
     recruitmentData: null;
-    abilities: [AgentAbilities, AgentAbilities, AgentAbilities , AgentAbilities]
+    abilities: [IAgentAbilities, IAgentAbilities, IAgentAbilities , IAgentAbilities]
     voiceLine: null
   }
 
-interface AgentAbilities {
+interface IAgentAbilities {
   slot: string;
   displayName: string;
   description: string;
