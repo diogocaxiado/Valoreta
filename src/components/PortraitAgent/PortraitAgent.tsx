@@ -15,7 +15,7 @@ export default function BackgroundAgent({ getAgentData, getAgentClass }: Backgro
         />
       </div>
       <img
-        className="absolute z-10 bottom-0 w-3/5"
+        className="absolute z-10 bottom-0 lg:w-3/5 lg:p-18"
         src={getAgentData("fullPortrait")}
         alt="agent photo"
       />
