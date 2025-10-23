@@ -14,5 +14,6 @@
 
   body {
     @apply font-tungsten font-prompt overflow-hidden;
+    background-color: black;
   }
 }
