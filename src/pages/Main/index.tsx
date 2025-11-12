@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useCallApi from "../../hooks/useCallApi";
 import Background from "../../components/Background/Background";
 import Message from "../../components/Message/Message";
@@ -24,6 +24,13 @@ const App = () => {
       language: "pt-BR",
     },
   });
+  const [enabledAgents, setEnabledAgents] = useState<IAgent[]>(null);
+
+  useEffect(() => {
+    if (agents) {
+      setEnabledAgents(agents)
+    }
+  }, [agents])
 
   function handleClickButton() {
     const random = Math.floor(Math.random() * (agents.length - 1));
@@ -53,6 +60,16 @@ const App = () => {
   function getAgentAbilities(randomA: string) {
     const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
     setAbilities(result.abilities);
+  }
+
+  function handleEnabledAgent(agent: IAgent) {
+    const findAgentList = enabledAgents.find((item) => item.uuid === agent.uuid);
+
+    if (!findAgentList) {
+      return setEnabledAgents([...enabledAgents, agent])
+    } else {
+      setEnabledAgents(enabledAgents.filter((item) => item.uuid !== agent.uuid));
+    }
   }
 
   if (isLoading) {
@@ -92,8 +109,10 @@ const App = () => {
         {agents && (
           <CardAgents
             agents={agents}
+            enabledAgents={enabledAgents}
             randomAgent={randomAgent}
             handleClickAgent={handleClickAgent}
+            handleEnabledAgent={handleEnabledAgent}
           />
         )}
       </main>
