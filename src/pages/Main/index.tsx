@@ -33,9 +33,9 @@ const App = () => {
   }, [agents])
 
   function handleClickButton() {
-    const random = Math.floor(Math.random() * (agents.length - 1));
-    setRandomAgent(agents[random].uuid);
-    getAgentAbilities(agents[random].uuid);
+    const random = Math.floor(Math.random() * (enabledAgents.length));
+    setRandomAgent(enabledAgents[random].uuid);
+    getAgentAbilities(enabledAgents[random].uuid);
     setDescriptionAbility("");
   }
 
@@ -44,21 +44,21 @@ const App = () => {
   }
 
   function getAgentData(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result[property];
   }
 
   function getAgentClass(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result.role[property];
   }
 
   function getAgentAbilities(randomA: string) {
-    const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
+    const result = enabledAgents?.find((agent: IAgent) => agent.uuid === randomA);
     setAbilities(result.abilities);
   }
 
