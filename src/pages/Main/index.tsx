@@ -39,6 +39,14 @@ const App = () => {
     setDescriptionAbility("");
   }
 
+  const handleClearAgentButton = () => {
+    setEnabledAgents(agents);
+  };
+
+  const handleSelectAllAgentButton = () => {
+    setEnabledAgents([]);
+  }
+
   function handleClickAgent() {
     setRandomAgent("");
   }
@@ -104,11 +112,21 @@ const App = () => {
 
         <Message randomAgent={randomAgent} />
 
-        <Button handleClickButton={handleClickButton} />
-
+        <div className="flex z-0">
+          <div className="flex flex-col items-start pl-16 gap-2 w-1/4">
+            <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
+            <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
+          </div>
+          
+          <div className="flex w-2/4 justify-center">
+            <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents.length === 0} />
+          </div>
+        </div>
+        
+        
         {agents && (
           <CardAgents
-            agents={agents}
+          agents={agents}
             enabledAgents={enabledAgents}
             randomAgent={randomAgent}
             handleClickAgent={handleClickAgent}
