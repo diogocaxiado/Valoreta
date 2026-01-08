@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: "Valorant-Font";
+  src: url("/Valorant-Font.ttf") format("truetype");
+}
+
+@font-face {
   font-family: "Tungsten-Font";
-  src: url("/public/Tungsten-Bold.ttf") format("opentype");
+  src: url("Tungsten-Bold.ttf") format("opentype");
 }
 
 @layer base {
@@ -13,6 +18,19 @@
   }
 
   body {
-    @apply font-tungsten font-prompt overflow-hidden;
+    @apply font-valorant overflow-hidden;
   }
 }
+
+@layer utilities {
+  .text-neon-blue {
+    color: transparent;
+    -webkit-text-stroke: 2px #00ffff; /* borda azul ciano */
+    text-shadow:
+      0 0 5px #00000000,
+      0 0 10px #09086146,
+      0 0 20px #09086121,
+      0 0 40px #00ffff;
+  }
+}
+

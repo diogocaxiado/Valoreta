@@ -8,6 +8,7 @@ import BackgroundAgent from "../../components/PortraitAgent/PortraitAgent";
 import Overview from "../../components/Overview/Overview";
 
 import { IAgent } from "../../types";
+import BgScreen from "../../assets/image/background.jpg";
 
 import { useParams } from "react-router-dom";
 import { updateRoomState } from "../../api/rouletteService";
@@ -103,7 +104,7 @@ const App = () => {
   return (
     <>
       <main className="flex flex-col justify-center w-screen h-screen">
-        <Background />
+        <Background type="image" src={BgScreen} overlay />
 
         {randomAgent && (
           <BackgroundAgent

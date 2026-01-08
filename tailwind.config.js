@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        'valorant': ['Valorant-Font', 'sans-serif'],
         'tungsten': ['Tungsten-Font', 'sans-serif'],
         'prompt': ['Prompt', 'sans-serif'],
       },
