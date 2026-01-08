@@ -29,7 +29,7 @@ export interface IAgent {
     voiceLine: null
   }
 
-interface IAgentAbilities {
+export interface IAgentAbilities {
   slot: string;
   displayName: string;
   description: string;
