@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Lobby from "../pages/Lobby";
 import Main from "../pages/Main/index";
+import NotFound from "../pages/NotFound";
 
 function AppRoutes() {
   return (
@@ -13,7 +14,7 @@ function AppRoutes() {
       <Route path="/" element={<Lobby />} />
 
       {/* Opcional: manter o coringa para caminhos não encontrados */}
-      <Route path="*" element={<Main />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
