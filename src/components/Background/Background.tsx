@@ -1,5 +1,3 @@
-import BgScreen from "../../assets/image/background.jpg";
-
 interface IBackground {
   type: 'image' | 'video'
   src: string
@@ -16,7 +14,6 @@ export default function Background({ type, src, overlay = false }: IBackground) 
           autoPlay
           loop
           muted
-          playsInline
           className="w-full h-full object-cover"
         >
           <source src={src} type="video/mp4" />

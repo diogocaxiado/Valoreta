@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Background from "../../components/Background/Background";
 import BgScreen from "../../assets/video/Valorant.mp4";
 import Topbar from "./components/Topbar";
@@ -7,10 +7,15 @@ import Button from "./components/Button";
 import Dice from "../../assets/image/dice.png"
 
 const Lobby = () => {
+  const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
 
   function handleClickButton() {
 
+  }
+
+  function handleSoloDraw() {
+    navigate('/sorteio')
   }
 
   return (
@@ -25,17 +30,17 @@ const Lobby = () => {
         <Topbar title="Lobby" />
       </div>
 
-      <div className="flex flex-col items-end p-4">
+      <div className="flex flex-col justify-center items-end p-8 min-h-[80vh]">
         <div className="
-          flex flex-col gap-4
-          border border-cyan-400 rounded-br-2xl p-4
+          flex flex-col gap-8
+          border border-cyan-400 rounded-br-2xl p-8
           bg-gradient-to-b from-cyan-800/30 to-transparent
           shadow-[0_0_15px_rgba(0,255,255,0.7)]
           backdrop-blur-sm
           "
         >
           <Button 
-            onClick={() => console.log("TESTE")}
+            onClick={handleSoloDraw}
             srcImage={Dice}
             altImage="Dado"
             title="Sorteio solo"
