@@ -8,14 +8,14 @@ import { getDatabase } from "firebase/database";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCMa6h39G8L7KKU5v1lfxxKFS0legaGo4w",
-  authDomain: "valoreta-b52ed.firebaseapp.com",
-  databaseURL: "https://valoreta-b52ed-default-rtdb.firebaseio.com",
-  projectId: "valoreta-b52ed",
-  storageBucket: "valoreta-b52ed.firebasestorage.app",
-  messagingSenderId: "312127708790",
-  appId: "1:312127708790:web:a861750df005c1af37c957",
-  measurementId: "G-ZBJFSK4CB2"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_DATABASE_URL,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

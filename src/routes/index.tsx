@@ -1,7 +1,10 @@
 import { Routes, Route } from "react-router-dom";
+import Lobby from "../pages/Lobby";
 import Main from "../pages/Main/index";
-import { useEffect, useState } from "react";
+import NotFound from "../pages/NotFound";
 import SplashScreen from "../components/Splash/Splash";
+
+import { useEffect, useState } from "react";
 
 function detectPWA(): boolean {
 	try {
@@ -27,6 +30,7 @@ export default function AppRoutes() {
 				window.location.reload()
 			}
 		}
+		
 
 		media.addEventListener('change', handleChange)
 		return () => media.removeEventListener('change', handleChange)
@@ -38,15 +42,12 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rotas para quando o usuário estiver em uma sala específica */}
-      <Route path="/sala/:roomId" element={<Main />} />
+			<Route path="/room" element={<Main />} />
       <Route path="/room/:roomId" element={<Main />} />
 
-      {/* Rota padrão (home) caso ele não digite nenhuma sala */}
-      <Route path="/" element={<Main />} />
+      <Route path="/" element={<Lobby />} />
 
-      {/* Opcional: manter o coringa para caminhos não encontrados */}
-      <Route path="*" element={<Main />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

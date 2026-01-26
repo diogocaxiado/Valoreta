@@ -1,3 +1,4 @@
+import { t } from "i18next";
 
 interface ButtonProps {
   title: string

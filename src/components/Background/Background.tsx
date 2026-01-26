@@ -1,9 +1,26 @@
-import BgScreen from "../../assets/image/background.jpg";
+interface IBackground {
+  type: 'image' | 'video'
+  src: string
+  overlay?: boolean
+}
 
-export default function Background() {
+export default function Background({ type, src, overlay = false }: IBackground) {
   return (
-    <section className="absolute top-0 w-full ">
-      <img src={BgScreen} className="w-full h-screen object-cover" />
+    <section className="absolute top-0 left-0 w-full h-full z-[-1] overflow-hidden">
+      {type === "image" ? (
+        <img src={src} alt="Background" className="w-full h-full object-cover" />
+      ) : (
+        <video
+          autoPlay
+          loop
+          muted
+          className="w-full h-full object-cover"
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      )}
+
+      {overlay && <div className="absolute inset-0 bg-black/50" /> }
     </section>
   );
 }

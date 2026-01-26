@@ -8,10 +8,14 @@ import BackgroundAgent from "../../components/PortraitAgent/PortraitAgent";
 import Overview from "../../components/Overview/Overview";
 
 import { IAgent } from "../../types";
+import BgScreen from "../../assets/video/Valorant-2.mp4";
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { updateRoomState } from "../../api/rouletteService";
 import { useRoulette } from "../../hooks/useRoullete";
+import ChangeLanguage from "../../components/ChangeLanguage/ChangeLanguage";
+import Topbar from "../Lobby/components/Topbar";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
@@ -19,6 +23,7 @@ const App = () => {
   const [descriptionAbility, setDescriptionAbility] = useState("");
   const { roomId } = useParams<{ roomId: string }>();
   const { data, loading } = useRoulette(roomId || 'default');
+  const navigate = useNavigate();
 
   const {
     data: agents,
@@ -132,7 +137,31 @@ const App = () => {
   return (
     <>
       <main className="flex flex-col justify-center w-screen h-screen">
-        <Background />
+        <Background type="video" src={BgScreen} />
+        <div className="flex justify-start absolute top-4 left-4 z-20">
+          <button
+            onClick={() => navigate('/')}
+            className="
+              flex items-center gap-2 border border-valorant-cyan text-valorant-cyan 
+              font-tungsten text-2xl uppercase tracking-[2px]
+              px-5 py-2 rounded-sm bg-transparent
+              hover:bg-valorant-cyan hover:text-black
+              hover:transition-all hover:duration-300
+            "
+          >
+            <ArrowLeftIcon className="w-6 h-6" />
+            Voltar
+          </button>
+        </div>
+
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+          <Topbar title="Sala" />
+        </div>
+        
+        {/* Em construção */}
+        {/* <div className="flex justify-end py-4 px-8 z-0">
+          <ChangeLanguage />
+        </div> */}
 
         {randomAgent && (
           <BackgroundAgent
@@ -167,7 +196,7 @@ const App = () => {
           />
         )}
 
-        <div className="flex justify-center gap-2 my-2">
+        <div className="flex justify-center gap-4 mt-2">
           <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
           <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
         </div>
