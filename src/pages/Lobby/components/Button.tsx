@@ -1,12 +1,15 @@
+import { CubeIcon, UserGroupIcon } from "@heroicons/react/24/solid";
+
 interface IButtonLobby {
   onClick: () => void
-  srcImage: string
-  altImage: string
   title: string
   description: string 
+  icon?: "solo" | "group";
 }
 
-export default function ButtonLobby({ onClick, srcImage, altImage, title, description }: IButtonLobby) {
+export default function ButtonLobby({ onClick, title, description, icon = "solo" }: IButtonLobby) {
+  const IconComponent = icon === "solo" ? CubeIcon : UserGroupIcon;
+
   return (
     <div 
       className="
@@ -25,17 +28,13 @@ export default function ButtonLobby({ onClick, srcImage, altImage, title, descri
       "
       onClick={onClick}
     >
-      <img
-        className="size-20"
-        src={srcImage}
-        alt={altImage}
-      />
+      <IconComponent className="w-20 h-20 text-cyan-300" />
 
       <div
-        className="flex flex-col gap-2 w-52"
+        className="flex flex-col gap-2 w-64"
       >
         <h3 className="text-2xl text-white font-bold uppercase font-valorant text-center">{title}</h3>
-        <p className="text-base text-white text-center">{description}</p>
+        <p className="text-base text-white text-center font-prompt">{description}</p>
       </div>
     </div>
   )
