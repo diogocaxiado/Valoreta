@@ -9,10 +9,17 @@ import Overview from "../../components/Overview/Overview";
 
 import { IAgent } from "../../types";
 
+import { useParams } from "react-router-dom";
+import { updateRoomState } from "../../api/rouletteService";
+import { useRoulette } from "../../hooks/useRoullete";
+
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
   const [abilities, setAbilities] = useState([]);
   const [descriptionAbility, setDescriptionAbility] = useState("");
+  const { roomId } = useParams<{ roomId: string }>();
+  const { data, loading } = useRoulette(roomId || 'default');
+
   const {
     data: agents,
     isLoading,
@@ -32,15 +39,45 @@ const App = () => {
     }
   }, [agents])
 
+  useEffect(() => {
+    if (roomId && data) {
+      setRandomAgent(data.agentUuid);
+      setAbilities(data.agentAbilities);
+      setDescriptionAbility(data.agentDescription);
+    }
+  }, [data, roomId]);
+
   function handleClickButton() {
-    const random = Math.floor(Math.random() * (agents.length - 1));
-    setRandomAgent(agents[random].uuid);
-    getAgentAbilities(agents[random].uuid);
+    if (!agents || agents.length === 0) return;
+
+    const randomIndex = Math.floor(Math.random() * (agents.length - 1));
+    const selectedAgent = agents[randomIndex];
+
+    setRandomAgent(selectedAgent.uuid);
+    getAgentAbilities(selectedAgent.uuid);
     setDescriptionAbility("");
+
+    const newAgentData = {
+      agentUuid: selectedAgent.uuid,
+      agentAbilities: selectedAgent.abilities,
+      agentDescription: selectedAgent.description
+    };
+
+    if (roomId) {
+      updateRoomState({
+        roomId: roomId,
+        data: newAgentData
+      });
+    } else {
+      setRandomAgent(newAgentData.agentUuid);
+      setAbilities(newAgentData.agentAbilities);
+      setDescriptionAbility(newAgentData.agentDescription);
+    }
   }
 
   function handleClickAgent() {
     setRandomAgent("");
+    updateRoomState({roomId: roomId || 'default', data: { agentUuid: "", agentAbilities: [], agentDescription: ""}});
   }
 
   function getAgentData(property: string) {
