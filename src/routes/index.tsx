@@ -42,6 +42,7 @@ export default function AppRoutes() {
 
   return (
     <Routes>
+			<Route path="/room" element={<Main />} />
       <Route path="/room/:roomId" element={<Main />} />
 
       <Route path="/" element={<Lobby />} />
