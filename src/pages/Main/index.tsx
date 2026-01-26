@@ -55,6 +55,9 @@ const App = () => {
 
     setRandomAgent(selectedAgent.uuid);
     getAgentAbilities(selectedAgent.uuid);
+    const random = Math.floor(Math.random() * (enabledAgents.length));
+    setRandomAgent(enabledAgents[random].uuid);
+    getAgentAbilities(enabledAgents[random].uuid);
     setDescriptionAbility("");
 
     const newAgentData = {
@@ -75,27 +78,35 @@ const App = () => {
     }
   }
 
+  const handleClearAgentButton = () => {
+    setEnabledAgents(agents);
+  };
+
+  const handleSelectAllAgentButton = () => {
+    setEnabledAgents([]);
+  }
+
   function handleClickAgent() {
     setRandomAgent("");
     updateRoomState({roomId: roomId || 'default', data: { agentUuid: "", agentAbilities: [], agentDescription: ""}});
   }
 
   function getAgentData(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result[property];
   }
 
   function getAgentClass(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result.role[property];
   }
 
   function getAgentAbilities(randomA: string) {
-    const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
+    const result = enabledAgents?.find((agent: IAgent) => agent.uuid === randomA);
     setAbilities(result.abilities);
   }
 
@@ -141,11 +152,21 @@ const App = () => {
 
         <Message randomAgent={randomAgent} />
 
-        <Button handleClickButton={handleClickButton} />
-
+        <div className="flex z-0">
+          <div className="flex flex-col items-start pl-16 gap-2 w-1/4">
+            <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
+            <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
+          </div>
+          
+          <div className="flex w-2/4 justify-center">
+            <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents.length === 0} />
+          </div>
+        </div>
+        
+        
         {agents && (
           <CardAgents
-            agents={agents}
+          agents={agents}
             enabledAgents={enabledAgents}
             randomAgent={randomAgent}
             handleClickAgent={handleClickAgent}
