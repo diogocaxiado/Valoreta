@@ -1,15 +1,37 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+@font-face {
+  font-family: "Valorant-Font";
+  src: url("/public/fonts/Valorant-Font.ttf") format("truetype");
 }
+
+@font-face {
+  font-family: "Tungsten-Font";
+  src: url("/public/fonts/Tungsten-Bold.ttf") format("opentype");
+}
+
+@layer base {
+  * {
+    @apply box-border m-0 p-0;
+  }
+
+  body {
+    @apply font-tungsten overflow-hidden;
+    background-color: black;
+  }
+}
+
+@layer utilities {
+  .text-neon-blue {
+    color: transparent;
+    -webkit-text-stroke: 2px #00ffff; /* borda azul ciano */
+    text-shadow:
+      0 0 5px #00000000,
+      0 0 10px #09086146,
+      0 0 20px #09086121,
+      0 0 40px #00ffff;
+  }
+}
+
