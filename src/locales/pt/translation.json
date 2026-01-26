@@ -6,5 +6,8 @@
   "createRoom": {
     "title": "Criar sala",
     "description": "Para compartilhar com amigos"
+  },
+  "roomPage": {
+    "button": "Rodar"
   }
 }

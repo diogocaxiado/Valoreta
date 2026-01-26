@@ -13,6 +13,7 @@ import BgScreen from "../../assets/image/background.jpg";
 import { useParams } from "react-router-dom";
 import { updateRoomState } from "../../api/rouletteService";
 import { useRoulette } from "../../hooks/useRoullete";
+import ChangeLanguage from "../../components/ChangeLanguage/ChangeLanguage";
 
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
@@ -105,6 +106,10 @@ const App = () => {
     <>
       <main className="flex flex-col justify-center w-screen h-screen">
         <Background type="image" src={BgScreen} overlay />
+        
+        <div className="flex justify-end py-4 px-8 z-0">
+          <ChangeLanguage />
+        </div>
 
         {randomAgent && (
           <BackgroundAgent

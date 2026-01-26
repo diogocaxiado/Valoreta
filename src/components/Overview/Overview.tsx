@@ -27,10 +27,10 @@ export default function Overview({
 
   return (
     <section className="flex flex-col z-20 absolute top-4 right-10 w-96 h-3/5 p-8">
-      <strong className="font-tungsten text-2xl uppercase tracking-widest">
+      <strong className="text-2xl uppercase tracking-widest">
         {getAgentClass("displayName")}
       </strong>
-      <h2 className="font-tungsten text-8xl uppercase tracking-wide leading-none text-valorant-yellow">{getAgentData("displayName")}</h2>
+      <h2 className="text-8xl uppercase tracking-wide leading-none text-valorant-yellow">{getAgentData("displayName")}</h2>
 
       <div className="flex gap-0.5 my-5">
         <CardAbilities
@@ -59,7 +59,7 @@ export default function Overview({
           : getAgentClass("description")}
       </p>
 
-      <strong className="font-tungsten text-3xl uppercase tracking-wide text-white">
+      <strong className="text-3xl uppercase tracking-wide text-white">
         {getAgentClass("displayName")}
       </strong>
       <p className="w-full font-prompt text-base text-left text-white">{getAgentClass("description")}</p>

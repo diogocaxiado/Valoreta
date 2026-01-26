@@ -6,5 +6,8 @@
   "createRoom": {
     "title": "Create room",
     "description": "To share with friends"
+  },
+  "roomPage": {
+    "button": "Rotate"
   }
 }
