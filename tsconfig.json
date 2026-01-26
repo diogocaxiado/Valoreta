@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "allowJs": true,
+    "lib": ["es2015", "dom"],
+    "target": "ESNext",
+    "module": "ESNext",
     "jsx": "react-jsx",
-    "lib": ["es2015", "dom"]
+    "moduleResolution": "bundler",
+    "allowJs": true,
   },
   "include": ["src", "global.d.ts"]
 }
