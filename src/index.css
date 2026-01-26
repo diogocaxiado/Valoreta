@@ -4,12 +4,7 @@
 
 @font-face {
   font-family: "Valorant-Font";
-  src: url("/Valorant-Font.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Tungsten-Font";
-  src: url("Tungsten-Bold.ttf") format("opentype");
+  src: url("/public/fonts/Valorant-Font.ttf") format("truetype");
 }
 
 @layer base {
@@ -18,7 +13,7 @@
   }
 
   body {
-    @apply font-valorant overflow-hidden;
+    @apply font-prompt overflow-hidden;
   }
 }
 

@@ -34,8 +34,8 @@ export default function ButtonLobby({ onClick, srcImage, altImage, title, descri
       <div
         className="flex flex-col gap-2 w-52"
       >
-        <h3 className="text-2xl text-white font-bold uppercase font-prompt text-center">{title}</h3>
-        <p className="text-base text-white font-prompt text-center">{description}</p>
+        <h3 className="text-2xl text-white font-bold uppercase font-valorant text-center">{title}</h3>
+        <p className="text-base text-white text-center">{description}</p>
       </div>
     </div>
   )
