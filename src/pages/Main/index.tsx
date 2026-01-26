@@ -48,10 +48,10 @@ const App = () => {
   }, [data, roomId]);
 
   function handleClickButton() {
-    if (!agents || agents.length === 0) return;
+    if (!enabledAgents || enabledAgents.length === 0) return;
 
-    const randomIndex = Math.floor(Math.random() * (agents.length - 1));
-    const selectedAgent = agents[randomIndex];
+    const randomIndex = Math.floor(Math.random() * (enabledAgents.length));
+    const selectedAgent = enabledAgents[randomIndex];
 
     setRandomAgent(selectedAgent.uuid);
     getAgentAbilities(selectedAgent.uuid);
@@ -83,6 +83,7 @@ const App = () => {
   };
 
   const handleSelectAllAgentButton = () => {
+    setRandomAgent("");
     setEnabledAgents([]);
   }
 
@@ -152,27 +153,24 @@ const App = () => {
 
         <Message randomAgent={randomAgent} />
 
-        <div className="flex z-0">
-          <div className="flex flex-col items-start pl-16 gap-2 w-1/4">
-            <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
-            <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
-          </div>
-          
-          <div className="flex w-2/4 justify-center">
-            <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents.length === 0} />
-          </div>
+        <div className="flex justify-center">
+          <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents?.length === 0} />
         </div>
-        
         
         {agents && (
           <CardAgents
-          agents={agents}
+            agents={agents}
             enabledAgents={enabledAgents}
             randomAgent={randomAgent}
             handleClickAgent={handleClickAgent}
             handleEnabledAgent={handleEnabledAgent}
           />
         )}
+
+        <div className="flex justify-center gap-2 my-2">
+          <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
+          <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
+        </div>
       </main>
     </>
   );

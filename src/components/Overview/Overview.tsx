@@ -26,7 +26,7 @@ export default function Overview({
   }
 
   return (
-    <section className="flex flex-col z-20 absolute top-4 right-10 w-96 h-3/5 p-8">
+    <section className="flex flex-col z-20 absolute top-4 right-2 w-1/4 p-8 border-2 border-white/50 bg-black bg-opacity-30">
       <strong className="font-tungsten text-2xl uppercase tracking-widest">
         {getAgentClass("displayName")}
       </strong>

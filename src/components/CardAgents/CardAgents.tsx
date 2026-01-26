@@ -25,7 +25,7 @@ export default function CardAgents({ agents, enabledAgents, randomAgent, handleC
 
   return (
     <section className="flex justify-center items-center relative z-10">
-      <div className="flex flex-wrap justify-center items-center gap-1 w-3/6 p-3 mt-5 border-2 border-white/50 bg-black/80 relative">
+      <div className={`flex flex-wrap justify-center items-center gap-1 w-2/4 p-3 mt-2 border-2 border-white/50 bg-black/80 relative ${randomAgent && "mr-8"}`}>
         {agents.map((agent) => {
           const enabled = isAgentEnabled(agent);
           
