@@ -15,16 +15,40 @@ export default defineConfig({
   plugins: [
     react(), 
     VitePWA({
-      registerType: 'autoUpdate',
+      includeAssets: [
+        'favicon.ico',
+        'apple-touch-icon.png',
+        'icons/*.svg',
+        'fonts/*.ttf',
+      ],
+      manifest: {
+        name: 'Valoreta',
+        short_name: 'Valoreta',
+        theme_color: '#121212',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'android-chrome-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'android-chrome-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      },
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globIgnores: ['**/index-Djb3DaPx.js']
+      },
       devOptions: {
         enabled: true
       },
-      manifest: {
-        name: 'Valorant',
-        short_name: 'Valorant',
-        description: 'A Valorant stats tracker app',
-        theme_color: '#121212' 
-      }
     })
   ],
 });

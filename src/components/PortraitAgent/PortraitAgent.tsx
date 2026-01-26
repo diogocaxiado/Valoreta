@@ -7,7 +7,7 @@ interface BackgroundAgent {
 export default function BackgroundAgent({ getAgentData, getAgentClass }: BackgroundAgent) {
   return (
     <section className="flex justify-center">
-      <div className="flex justify-center items-center absolute z-10 top-4 left-4 w-1/5 opacity-60">
+      <div className="flex justify-center items-center absolute z-10 top-4 left-4 w-1/5 opacity-80">
         <img
           className="w-full"
           alt="agent class"
@@ -15,7 +15,7 @@ export default function BackgroundAgent({ getAgentData, getAgentClass }: Backgro
         />
       </div>
       <img
-        className="absolute z-10 bottom-0 lg:w-3/5 lg:p-18"
+        className="absolute z-10 bottom-0 lg:w-3/5 lg:p-24"
         src={getAgentData("fullPortrait")}
         alt="agent photo"
       />

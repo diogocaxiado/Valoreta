@@ -33,6 +33,13 @@ const App = () => {
       language: "pt-BR",
     },
   });
+  const [enabledAgents, setEnabledAgents] = useState<IAgent[]>(null);
+
+  useEffect(() => {
+    if (agents) {
+      setEnabledAgents(agents)
+    }
+  }, [agents])
 
   useEffect(() => {
     if (roomId && data) {
@@ -43,13 +50,16 @@ const App = () => {
   }, [data, roomId]);
 
   function handleClickButton() {
-    if (!agents || agents.length === 0) return;
+    if (!enabledAgents || enabledAgents.length === 0) return;
 
-    const randomIndex = Math.floor(Math.random() * (agents.length - 1));
-    const selectedAgent = agents[randomIndex];
+    const randomIndex = Math.floor(Math.random() * (enabledAgents.length));
+    const selectedAgent = enabledAgents[randomIndex];
 
     setRandomAgent(selectedAgent.uuid);
     getAgentAbilities(selectedAgent.uuid);
+    const random = Math.floor(Math.random() * (enabledAgents.length));
+    setRandomAgent(enabledAgents[random].uuid);
+    getAgentAbilities(enabledAgents[random].uuid);
     setDescriptionAbility("");
 
     const newAgentData = {
@@ -70,28 +80,47 @@ const App = () => {
     }
   }
 
+  const handleClearAgentButton = () => {
+    setEnabledAgents(agents);
+  };
+
+  const handleSelectAllAgentButton = () => {
+    setRandomAgent("");
+    setEnabledAgents([]);
+  }
+
   function handleClickAgent() {
     setRandomAgent("");
     updateRoomState({roomId: roomId || 'default', data: { agentUuid: "", agentAbilities: [], agentDescription: ""}});
   }
 
   function getAgentData(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result[property];
   }
 
   function getAgentClass(property: string) {
-    const result = agents?.find(
+    const result = enabledAgents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
     return result.role[property];
   }
 
   function getAgentAbilities(randomA: string) {
-    const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
+    const result = enabledAgents?.find((agent: IAgent) => agent.uuid === randomA);
     setAbilities(result.abilities);
+  }
+
+  function handleEnabledAgent(agent: IAgent) {
+    const findAgentList = enabledAgents.find((item) => item.uuid === agent.uuid);
+
+    if (!findAgentList) {
+      return setEnabledAgents([...enabledAgents, agent])
+    } else {
+      setEnabledAgents(enabledAgents.filter((item) => item.uuid !== agent.uuid));
+    }
   }
 
   if (isLoading) {
@@ -130,15 +159,24 @@ const App = () => {
 
         <Message randomAgent={randomAgent} />
 
-        <Button handleClickButton={handleClickButton} />
-
+        <div className="flex justify-center">
+          <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents?.length === 0} />
+        </div>
+        
         {agents && (
           <CardAgents
             agents={agents}
+            enabledAgents={enabledAgents}
             randomAgent={randomAgent}
             handleClickAgent={handleClickAgent}
+            handleEnabledAgent={handleEnabledAgent}
           />
         )}
+
+        <div className="flex justify-center gap-2 my-2">
+          <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
+          <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
+        </div>
       </main>
     </>
   );
