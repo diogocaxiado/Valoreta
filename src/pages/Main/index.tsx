@@ -8,7 +8,7 @@ import BackgroundAgent from "../../components/PortraitAgent/PortraitAgent";
 import Overview from "../../components/Overview/Overview";
 
 import { IAgent } from "../../types";
-import BgScreen from "../../assets/image/background.jpg";
+import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 import { useParams } from "react-router-dom";
 import { updateRoomState } from "../../api/rouletteService";
@@ -134,11 +134,12 @@ const App = () => {
   return (
     <>
       <main className="flex flex-col justify-center w-screen h-screen">
-        <Background type="image" src={BgScreen} overlay />
+        <Background type="video" src={BgScreen} />
         
-        <div className="flex justify-end py-4 px-8 z-0">
+        {/* Em construção */}
+        {/* <div className="flex justify-end py-4 px-8 z-0">
           <ChangeLanguage />
-        </div>
+        </div> */}
 
         {randomAgent && (
           <BackgroundAgent
@@ -173,7 +174,7 @@ const App = () => {
           />
         )}
 
-        <div className="flex justify-center gap-2 my-2">
+        <div className="flex justify-center gap-4 mt-2">
           <Button title="Limpar seleção" handleClickButton={handleClearAgentButton} />
           <Button title="Selecionar todos" handleClickButton={handleSelectAllAgentButton} />
         </div>

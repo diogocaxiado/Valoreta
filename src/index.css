@@ -7,13 +7,18 @@
   src: url("/public/fonts/Valorant-Font.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "Tungsten-Font";
+  src: url("/public/fonts/Tungsten-Bold.ttf") format("opentype");
+}
+
 @layer base {
   * {
     @apply box-border m-0 p-0;
   }
 
   body {
-    @apply font-tungsten font-prompt overflow-hidden;
+    @apply font-tungsten overflow-hidden;
     background-color: black;
   }
 }
