@@ -36,7 +36,7 @@ const App = () => {
       language: "pt-BR",
     },
   });
-  const [enabledAgents, setEnabledAgents] = useState<IAgent[]>(null);
+  const [enabledAgents, setEnabledAgents] = useState<IAgent[] | any>(null);
 
   useEffect(() => {
     if (agents) {
@@ -51,6 +51,16 @@ const App = () => {
       setDescriptionAbility(data.agentDescription);
     }
   }, [data, roomId]);
+
+  useEffect(() => {
+    if (data?.enabledAgents && agents) {
+      const filteredAgents = agents.filter(agent =>
+        data.enabledAgents.includes(agent.uuid)
+      );
+
+      setEnabledAgents(filteredAgents);
+    }
+  }, [data, agents]);
 
   function handleClickButton() {
     if (!enabledAgents || enabledAgents.length === 0) return;
@@ -117,12 +127,29 @@ const App = () => {
   }
 
   function handleEnabledAgent(agent: IAgent) {
-    const findAgentList = enabledAgents.find((item) => item.uuid === agent.uuid);
+    const isEnabled = enabledAgents.some(
+      (item) => item.uuid === agent.uuid
+    );
 
-    if (!findAgentList) {
-      return setEnabledAgents([...enabledAgents, agent])
+    let updatedAgents;
+
+    if (!isEnabled) {
+      updatedAgents = [...enabledAgents, agent];
     } else {
-      setEnabledAgents(enabledAgents.filter((item) => item.uuid !== agent.uuid));
+      updatedAgents = enabledAgents.filter(
+        (item) => item.uuid !== agent.uuid
+      );
+    }
+
+    setEnabledAgents(updatedAgents);
+
+    if (roomId) {
+      updateRoomState({
+        roomId,
+        data: {
+          enabledAgents: updatedAgents.map(a => a.uuid)
+        }
+      });
     }
   }
 
