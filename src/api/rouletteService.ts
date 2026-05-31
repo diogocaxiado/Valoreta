@@ -1,18 +1,19 @@
-import { onValue, ref, set } from "firebase/database";
+import { onValue, ref, set, update } from "firebase/database";
 import { db } from '../services/firebase';
-import { IAgentAbilities } from "../types";
+import { IAgent, IAgentAbilities } from "../types";
 
 interface updateRoomStateParams {
   roomId: string;
   data: {
-    agentUuid: string;
-    agentAbilities: IAgentAbilities[] | [];
-    agentDescription: string;
+    agentUuid?: string;
+    agentAbilities?: IAgentAbilities[] | [];
+    agentDescription?: string;
+    enabledAgents?: IAgent[] | [];
   }
 }
 
 export const updateRoomState = ({roomId, data}: updateRoomStateParams) => {
-  return set(ref(db, `room/${roomId}/state`), {
+  return update(ref(db, `room/${roomId}/state`), {
     ...data,
     updatedAt: Date.now(),
   });
