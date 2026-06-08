@@ -20,6 +20,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 const App = () => {
   const [randomAgent, setRandomAgent] = useState("");
   const [abilities, setAbilities] = useState([]);
+  const [isSpinning, setIsSpinning] = useState(false);
   const [descriptionAbility, setDescriptionAbility] = useState("");
   const { roomId } = useParams<{ roomId: string }>();
   const { data, loading } = useRoulette(roomId || 'default');
@@ -63,34 +64,43 @@ const App = () => {
   }, [data, agents]);
 
   function handleClickButton() {
-    if (!enabledAgents || enabledAgents.length === 0) return;
+    if (!enabledAgents || enabledAgents.length === 0 || isSpinning) return;
 
-    const randomIndex = Math.floor(Math.random() * (enabledAgents.length));
-    const selectedAgent = enabledAgents[randomIndex];
+    setIsSpinning(true);
+    setDescriptionAbility('');
 
-    setRandomAgent(selectedAgent.uuid);
-    getAgentAbilities(selectedAgent.uuid);
-    const random = Math.floor(Math.random() * (enabledAgents.length));
-    setRandomAgent(enabledAgents[random].uuid);
-    getAgentAbilities(enabledAgents[random].uuid);
-    setDescriptionAbility("");
+    const spinDuration = 2000;
+    const spinInterval = 100;
 
-    const newAgentData = {
-      agentUuid: selectedAgent.uuid,
-      agentAbilities: selectedAgent.abilities,
-      agentDescription: selectedAgent.description
-    };
+    const spin = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * enabledAgents.length);
+      const spinningAgent = enabledAgents[randomIndex];
+      setRandomAgent(spinningAgent.uuid);
+    }, spinInterval);
 
-    if (roomId) {
-      updateRoomState({
-        roomId: roomId,
-        data: newAgentData
-      });
-    } else {
+    setTimeout(() => {
+      clearInterval(spin);
+
+      const finalRandomIndex = Math.floor(Math.random() * enabledAgents.length);
+      const finalAgent = enabledAgents[finalRandomIndex];
+
+      const newAgentData = {
+        agentUuid: finalAgent.uuid,
+        agentAbilities: finalAgent.abilities,
+        agentDescription: finalAgent.description,
+      };
+
+      if (roomId) {
+        updateRoomState({
+          roomId: roomId,
+          data: newAgentData,
+        });
+      }
+
       setRandomAgent(newAgentData.agentUuid);
       setAbilities(newAgentData.agentAbilities);
-      setDescriptionAbility(newAgentData.agentDescription);
-    }
+      setIsSpinning(false);
+    }, spinDuration);
   }
 
   const handleClearAgentButton = () => {
@@ -108,22 +118,26 @@ const App = () => {
   }
 
   function getAgentData(property: string) {
-    const result = enabledAgents?.find(
+    const result = agents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
+    if (!result) return '';
     return result[property];
   }
 
   function getAgentClass(property: string) {
-    const result = enabledAgents?.find(
+    const result = agents?.find(
       (agent: IAgent) => agent.uuid === randomAgent
     );
+    if (!result || !result.role) return '';
     return result.role[property];
   }
 
   function getAgentAbilities(randomA: string) {
-    const result = enabledAgents?.find((agent: IAgent) => agent.uuid === randomA);
-    setAbilities(result.abilities);
+    const result = agents?.find((agent: IAgent) => agent.uuid === randomA);
+    if (result) {
+      setAbilities(result.abilities);
+    }
   }
 
   function handleEnabledAgent(agent: IAgent) {
@@ -210,7 +224,7 @@ const App = () => {
         <Message randomAgent={randomAgent} />
 
         <div className="flex justify-center">
-          <Button title="Rodar" variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents?.length === 0} />
+          <Button title={isSpinning ? "Rodando..." : "Rodar"} variant="primary" handleClickButton={handleClickButton} disabled={enabledAgents?.length === 0 || isSpinning} />
         </div>
         
         {agents && (
