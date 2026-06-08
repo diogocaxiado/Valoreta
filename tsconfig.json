@@ -1,11 +1,20 @@
 {
   "compilerOptions": {
-    "lib": ["es2015", "dom"],
     "target": "ESNext",
     "module": "ESNext",
-    "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "allowJs": true,
+    "lib": ["ES2015", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "global.d.ts"]
+  "include": ["src", "global.d.ts", "vite.env.d.ts"]
 }
