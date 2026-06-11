@@ -31,10 +31,10 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white font-prompt p-8">
-          <h1 className="text-4xl font-valorant text-valorant-red mb-4">
+          <h1 className="text-h2 font-montserrat font-bold uppercase tracking-widest text-valorant-red mb-4">
             Algo deu errado
           </h1>
-          <p className="text-lg text-valorant-light mb-6">
+          <p className="text-body-lg text-valorant-light font-prompt mb-6">
             {this.state.error?.message ?? "Erro inesperado"}
           </p>
           <Button

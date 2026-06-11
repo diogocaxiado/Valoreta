@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils"
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center whitespace-nowrap",
-    "rounded-sm text-sm font-bold",
+    "rounded-sm text-sm",
     "ring-offset-background",
     "transition-all duration-150 ease-out",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-40 disabled:scale-100",
     "select-none",
-    "font-tungsten uppercase tracking-widest",
+    "font-montserrat font-bold uppercase tracking-widest",
     "active:scale-[0.96]",
   ].join(" "),
   {

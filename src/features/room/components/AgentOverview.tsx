@@ -29,10 +29,10 @@ export function AgentOverview({
 
   return (
     <Card className="flex flex-col z-20 absolute top-4 right-2 w-1/4 p-6 border-2 border-white/50 bg-black/80 backdrop-blur-sm shadow-none">
-      <strong className="font-tungsten text-2xl uppercase tracking-widest text-valorant-cyan">
+      <strong className="font-montserrat font-bold text-h4 uppercase tracking-widest text-valorant-cyan">
         {getAgentClass("displayName")}
       </strong>
-      <h2 className="text-8xl uppercase tracking-wide leading-none text-valorant-yellow">
+      <h2 className="text-8xl font-montserrat font-extrabold uppercase tracking-wide leading-none text-valorant-yellow">
         {getAgentData("displayName")}
       </h2>
 
@@ -63,7 +63,7 @@ export function AgentOverview({
           : getAgentClass("description")}
       </p>
 
-      <strong className="text-3xl uppercase tracking-wide text-white">
+      <strong className="text-h3 font-montserrat font-bold uppercase tracking-wide text-white">
         {getAgentClass("displayName")}
       </strong>
       <p className="w-full font-prompt text-base text-left text-white">

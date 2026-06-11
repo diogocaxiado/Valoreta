@@ -14,7 +14,7 @@ export function Topbar({ title }: TopbarProps) {
           backdrop-blur-sm
         "
       >
-        <h2 className="text-2xl text-white font-bold uppercase font-prompt">
+        <h2 className="text-h4 text-white font-montserrat font-bold uppercase">
           {title}
         </h2>
       </div>

@@ -27,7 +27,7 @@ export function RouletteMessage({ randomAgent }: RouletteMessageProps) {
           </h1>
         )}
         {!randomAgent && (
-          <p className="text-center text-2xl z-10 text-valorant-cyan font-prompt">
+          <p className="text-center text-h4 z-10 text-valorant-cyan font-prompt">
             Vamos ver qual agente será o seu!
           </p>
         )}

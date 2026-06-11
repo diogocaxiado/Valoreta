@@ -24,7 +24,7 @@ export function Button({
       <div className="relative group">
         <ShadcnButton
           variant={shadcnVariant}
-          size="lg"
+          size="default"
           disabled={disabled}
           loading={loading}
           onClick={onClick}

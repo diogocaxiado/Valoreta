@@ -39,7 +39,7 @@ export function LobbyButton({
       <IconComponent className="w-20 h-20 text-cyan-300 shrink-0" />
 
       <div className="flex flex-col gap-2 w-64">
-        <h3 className="text-2xl text-white font-bold uppercase font-valorant text-center">
+        <h3 className="text-xl text-white font-montserrat font-bold uppercase text-center">
           {title}
         </h3>
         <p className="text-base text-white text-center font-prompt">
