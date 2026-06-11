@@ -4,21 +4,39 @@
 
 @font-face {
   font-family: "Valorant-Font";
-  src: url("/public/fonts/Valorant-Font.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Tungsten-Font";
-  src: url("/public/fonts/Tungsten-Bold.ttf") format("opentype");
+  src: url("/fonts/Valorant-Font.ttf") format("truetype");
 }
 
 @layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 357 100% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 180 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 180 100% 50%;
+    --radius: 0.5rem;
+  }
+
   * {
     @apply box-border m-0 p-0;
   }
 
   body {
-    @apply font-tungsten overflow-hidden;
+    @apply font-prompt overflow-hidden;
     background-color: black;
   }
 }
@@ -26,7 +44,7 @@
 @layer utilities {
   .text-neon-blue {
     color: transparent;
-    -webkit-text-stroke: 2px #00ffff; /* borda azul ciano */
+    -webkit-text-stroke: 2px #00ffff;
     text-shadow:
       0 0 5px #00000000,
       0 0 10px #09086146,
@@ -34,4 +52,3 @@
       0 0 40px #00ffff;
   }
 }
-
