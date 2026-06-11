@@ -8,7 +8,7 @@ export default {
     extend: {
       fontFamily: {
         'valorant': ['Valorant-Font', 'sans-serif'],
-        'tungsten': ['Tungsten-Font', 'sans-serif'],
+        'montserrat': ['Montserrat', 'sans-serif'],
         'prompt': ['Prompt', 'sans-serif'],
       },
       colors: {
@@ -59,6 +59,15 @@ export default {
       },
       fontSize: {
         '8xl': '8.2rem',
+        'display': ['6rem', { lineHeight: '1', letterSpacing: '0.1em' }],
+        'h1': ['4.5rem', { lineHeight: '1', letterSpacing: '0.05em' }],
+        'h2': ['3rem', { lineHeight: '1.1', letterSpacing: '0.05em' }],
+        'h3': ['2.25rem', { lineHeight: '1.2', letterSpacing: '0.025em' }],
+        'h4': ['1.5rem', { lineHeight: '1.3', letterSpacing: '0.025em' }],
+        'body-lg': ['1.125rem', { lineHeight: '1.75', letterSpacing: '0em' }],
+        'body': ['1rem', { lineHeight: '1.5', letterSpacing: '0em' }],
+        'small': ['0.875rem', { lineHeight: '1.5', letterSpacing: '0em' }],
+        'caption': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0em' }],
       },
       letterSpacing: {
         '4': '4px',

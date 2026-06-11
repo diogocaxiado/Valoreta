@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
+import { useRoomPresence } from "../../hooks/useRoomPresence";
+import { getPlayerId } from "../../services/playerSession";
 
 import { Background } from "../../common/components/Background/Background";
 import { Topbar } from "../../common/components/Topbar/Topbar";
@@ -10,6 +12,9 @@ import { AgentPortrait } from "./components/AgentPortrait";
 import { AgentOverview } from "./components/AgentOverview";
 import { RouletteMessage } from "./components/RouletteMessage";
 import { CardAgents } from "./components/CardAgents";
+import { PlayerList } from "./components/PlayerList";
+import { RoomAccessGate } from "./components/RoomAccessGate";
+import { leaveRoom } from "../../services/roomService";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
@@ -19,13 +24,36 @@ interface RoomPageProps {
 
 export function RoomPage({ mode }: RoomPageProps) {
   const { roomId } = useParams<{ roomId: string }>();
-  const navigate = useNavigate();
-
+  const playerId = getPlayerId();
   const isMultiplayer = mode === "multiplayer" && !!roomId;
 
-  const { roomState, isConnected, syncToRoom } = useRoom(
+  if (isMultiplayer) {
+    return (
+      <RoomAccessGate roomId={roomId!} playerId={playerId}>
+        <RoomLayout roomId={roomId!} playerId={playerId} mode="multiplayer" />
+      </RoomAccessGate>
+    );
+  }
+
+  return <RoomLayout mode="solo" />;
+}
+
+interface RoomLayoutProps {
+  mode: "solo" | "multiplayer";
+  roomId?: string;
+  playerId?: string;
+}
+
+function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
+  const navigate = useNavigate();
+  const isMultiplayer = mode === "multiplayer" && !!roomId;
+
+  const { roomState, isConnected: isGameConnected, syncToRoom } = useRoom(
     isMultiplayer ? roomId : undefined
   );
+
+  const { players, playerCount, isConnected: isPresenceConnected, currentPlayer } =
+    useRoomPresence(isMultiplayer ? roomId : undefined, isMultiplayer ? playerId : undefined);
 
   const { state, actions } = useRoulette({
     mode,
@@ -58,7 +86,7 @@ export function RoomPage({ mode }: RoomPageProps) {
   if (isLoading) {
     return (
       <main className="flex flex-col justify-center items-center w-screen h-screen bg-black">
-        <div className="animate-pulse text-valorant-cyan font-tungsten text-4xl uppercase tracking-widest">
+        <div className="animate-pulse text-valorant-cyan font-montserrat font-bold text-h2 uppercase tracking-widest">
           Carregando...
         </div>
       </main>
@@ -68,7 +96,7 @@ export function RoomPage({ mode }: RoomPageProps) {
   if (error) {
     return (
       <main className="flex flex-col justify-center items-center w-screen h-screen bg-black">
-        <h1 className="text-valorant-red font-valorant text-4xl mb-4">
+        <h1 className="text-h2 text-valorant-red font-montserrat font-bold uppercase tracking-widest mb-4">
           Erro ao carregar dados
         </h1>
         <p className="text-white font-prompt text-lg">{error.message}</p>
@@ -91,7 +119,12 @@ export function RoomPage({ mode }: RoomPageProps) {
         <ShadcnButton
           variant="outline"
           size="default"
-          onClick={() => navigate("/")}
+          onClick={() => {
+            if (isMultiplayer && roomId) {
+              leaveRoom(roomId, playerId!)
+            }
+            navigate("/")
+          }}
           className="flex items-center gap-2 px-5 py-2 h-auto"
         >
           <ArrowLeftIcon className="w-5 h-5" />
@@ -104,12 +137,22 @@ export function RoomPage({ mode }: RoomPageProps) {
         {isMultiplayer && (
           <span
             className={`w-3 h-3 rounded-full ${
-              isConnected ? "bg-valorant-green" : "bg-red-500 animate-pulse"
+              isPresenceConnected ? "bg-valorant-green" : "bg-red-500 animate-pulse"
             }`}
-            title={isConnected ? "Conectado" : "Desconectado"}
+            title={isPresenceConnected ? "Conectado" : "Desconectado"}
           />
         )}
       </div>
+
+      {isMultiplayer && (
+        <div className="absolute top-20 left-4 z-20">
+          <PlayerList
+            players={players}
+            playerCount={playerCount}
+            currentPlayerId={playerId}
+          />
+        </div>
+      )}
 
       {randomAgent && (
         <AgentPortrait
