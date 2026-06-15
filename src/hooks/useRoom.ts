@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RoomState, updateRoomState, subscribeToRoom } from "../services/roomService";
 
-export function useRoom(roomId: string | undefined) {
+export function useRoom(roomId: string | undefined, playerId?: string) {
   const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -28,12 +28,12 @@ export function useRoom(roomId: string | undefined) {
   const syncToRoom = useCallback(
     (data: Partial<RoomState>) => {
       if (roomId) {
-        updateRoomState(roomId, data).catch((err) =>
+        updateRoomState(roomId, data, playerId).catch((err) =>
           setError(err instanceof Error ? err : new Error(String(err)))
         );
       }
     },
-    [roomId]
+    [roomId, playerId]
   );
 
   return { roomState, isConnected, syncToRoom, error };

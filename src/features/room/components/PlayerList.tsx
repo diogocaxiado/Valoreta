@@ -6,12 +6,14 @@ interface PlayerListProps {
   players: PlayerInfo[]
   playerCount: number
   currentPlayerId?: string
+  onTransferHost?: (newHostId: string) => void
 }
 
 export function PlayerList({
   players,
   playerCount,
   currentPlayerId,
+  onTransferHost,
 }: PlayerListProps) {
   return (
     <div className="flex flex-col w-64 bg-black/80 border border-white/20 rounded-sm p-4">
@@ -46,6 +48,27 @@ export function PlayerList({
                 {player.name}
                 {isCurrentPlayer ? " (Você)" : ""}
               </span>
+
+              {player.isHost && (
+                <span className="ml-auto text-[10px] font-montserrat font-bold uppercase tracking-wider text-valorant-yellow/80">
+                  HOST
+                </span>
+              )}
+
+              {onTransferHost && !player.isHost && player.id !== currentPlayerId && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onTransferHost(player.id)
+                  }}
+                  className="ml-auto text-[10px] font-montserrat font-bold uppercase tracking-wider
+                    text-cyan-400/70 hover:text-cyan-300 transition-colors cursor-pointer bg-transparent border-0"
+                  title="Transferir liderança"
+                >
+                  Transferir
+                </button>
+              )}
             </div>
           )
         })}

@@ -11,6 +11,10 @@ export interface RoomState {
   }>;
   agentDescription?: string;
   enabledAgents?: string[];
+  rolling?: boolean;
+  rollWinner?: string;
+  rollStartedAt?: number;
+  rollInitiatedBy?: string;
 }
 
 export interface PlayerData {
@@ -103,6 +107,24 @@ export async function rejoinRoom(
   });
 }
 
+export async function transferHost(
+  roomId: string,
+  currentPlayerId: string,
+  newHostId: string
+): Promise<void> {
+  const snap = await get(child(ref(db), `room/${roomId}/hostId`));
+  const storedHostId = snap.val();
+  if (!storedHostId || storedHostId !== currentPlayerId) {
+    throw new Error("Apenas o host atual pode transferir a liderança.");
+  }
+
+  await update(ref(db), {
+    [`room/${roomId}/hostId`]: newHostId,
+    [`room/${roomId}/players/${currentPlayerId}/isHost`]: false,
+    [`room/${roomId}/players/${newHostId}/isHost`]: true,
+  });
+}
+
 export async function deleteRoom(roomId: string): Promise<void> {
   await remove(roomRef(roomId));
 }
@@ -175,7 +197,19 @@ export function subscribeRoomPlayers(
   });
 }
 
-export function updateRoomState(roomId: string, data: Partial<RoomState>) {
+export async function updateRoomState(
+  roomId: string,
+  data: Partial<RoomState>,
+  playerId?: string
+) {
+  if (playerId) {
+    const snapshot = await get(child(ref(db), `room/${roomId}/hostId`));
+    const hostId = snapshot.val();
+    if (hostId && hostId !== playerId) {
+      throw new Error("Apenas o host pode modificar a sala.");
+    }
+  }
+
   return update(roomDataRef(roomId), {
     ...data,
     updatedAt: Date.now(),
