@@ -121,8 +121,6 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     handleClickButton,
     handleEnabledAgent,
     handleRoleToggle,
-    handleClearAgentButton,
-    handleSelectAllAgentButton,
     handleClickAgent,
     getAgentData,
     getAgentClass,

@@ -212,17 +212,6 @@ export function useRoulette({
     [agents, enabledAgents, isMultiplayer, canAct, syncEnabled]
   );
 
-  const handleClearAgentButton = useCallback(() => {
-    if (isMultiplayer && !canAct) return;
-    if (agents) setEnabledAgents(agents);
-  }, [agents, isMultiplayer, canAct]);
-
-  const handleSelectAllAgentButton = useCallback(() => {
-    if (isMultiplayer && !canAct) return;
-    setRandomAgent("");
-    setEnabledAgents([]);
-  }, [isMultiplayer, canAct]);
-
   const handleClickAgent = useCallback(() => {
     if (isMultiplayer && !canAct) return;
     setRandomAgent("");
@@ -278,8 +267,6 @@ export function useRoulette({
       handleClickButton,
       handleEnabledAgent,
       handleRoleToggle,
-      handleClearAgentButton,
-      handleSelectAllAgentButton,
       handleClickAgent,
       getAgentData,
       getAgentClass,
