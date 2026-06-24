@@ -9,14 +9,22 @@ interface UseRouletteOptions {
   mode: "solo" | "multiplayer";
   roomState?: RoomState | null;
   syncToRoom?: (data: Partial<RoomState>) => void;
+  playerId?: string;
+  isHost?: boolean;
 }
+
+const ROLL_DURATION = 2000;
 
 export function useRoulette({
   mode,
   roomState,
   syncToRoom,
+  playerId,
+  isHost,
 }: UseRouletteOptions) {
   const isMultiplayer = mode === "multiplayer" && !!syncToRoom;
+  const wasRollingRef = useRef(false);
+  const canAct = !isMultiplayer || isHost;
 
   const {
     data: agents,
@@ -47,10 +55,9 @@ export function useRoulette({
   useEffect(() => {
     if (!isMultiplayer || !roomState) return;
 
-    if (roomState.agentUuid) setRandomAgent(roomState.agentUuid);
-    if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
-    if (roomState.agentDescription)
-      setDescriptionAbility(roomState.agentDescription);
+    setRandomAgent(roomState.agentUuid ?? "");
+    setAbilities(roomState.agentAbilities || []);
+    setDescriptionAbility(roomState.agentDescription ?? "");
     if (roomState.enabledAgents && agents) {
       const filtered = agents.filter((a) =>
         roomState.enabledAgents!.includes(a.uuid)
@@ -63,8 +70,83 @@ export function useRoulette({
     return () => spinRef.current?.cancel();
   }, []);
 
+  useEffect(() => {
+    if (!isMultiplayer || !roomState || !agents) return;
+
+    const isRolling = roomState.rolling === true;
+    const wasRolling = wasRollingRef.current;
+    wasRollingRef.current = isRolling;
+
+    if (!isRolling) {
+      setIsSpinning(false);
+      return;
+    }
+
+    if (wasRolling) return;
+
+    const rollWinner = roomState.rollWinner;
+    if (!rollWinner) return;
+
+    const winnerAgent = agents.find((a) => a.uuid === rollWinner);
+    if (!winnerAgent) return;
+
+    setIsSpinning(true);
+    setDescriptionAbility("");
+    spinRef.current?.cancel();
+
+    const elapsed = Date.now() - (roomState.rollStartedAt || Date.now());
+    const remaining = Math.max(0, ROLL_DURATION - elapsed);
+
+    if (remaining <= 100) {
+      setRandomAgent(rollWinner);
+      if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+      if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
+
+      if (roomState.rollInitiatedBy === playerId) {
+        syncToRoom!({ rolling: false });
+      }
+
+      setIsSpinning(false);
+      return;
+    }
+
+    const animation = createSpinAnimation(enabledAgents, {
+      onTick: (agent) => setRandomAgent(agent.uuid),
+      onComplete: () => {
+        setRandomAgent(rollWinner);
+        if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+        if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
+
+        if (roomState.rollInitiatedBy === playerId) {
+          syncToRoom!({ rolling: false });
+        }
+
+        setIsSpinning(false);
+      },
+    }, winnerAgent);
+
+    spinRef.current = animation;
+  }, [roomState?.rolling, roomState?.rollWinner, agents, isMultiplayer, syncToRoom, playerId, enabledAgents]);
+
   const handleClickButton = useCallback(() => {
     if (!enabledAgents.length || isSpinning) return;
+    if (isMultiplayer && (!canAct || roomState?.rolling)) return;
+
+    if (isMultiplayer) {
+      const winner = enabledAgents[Math.floor(Math.random() * enabledAgents.length)];
+
+      syncToRoom!({
+        rolling: true,
+        rollWinner: winner.uuid,
+        rollStartedAt: Date.now(),
+        rollInitiatedBy: playerId,
+        agentUuid: winner.uuid,
+        agentAbilities: winner.abilities,
+        agentDescription: winner.description,
+      });
+
+      return;
+    }
 
     setIsSpinning(true);
     setDescriptionAbility("");
@@ -75,47 +157,63 @@ export function useRoulette({
         setRandomAgent(agent.uuid);
         setAbilities(agent.abilities);
         setIsSpinning(false);
-
-        if (isMultiplayer) {
-          syncToRoom!({
-            agentUuid: agent.uuid,
-            agentAbilities: agent.abilities,
-            agentDescription: agent.description,
-          });
-        }
       },
     });
 
     spinRef.current = animation;
-  }, [enabledAgents, isSpinning, isMultiplayer, syncToRoom]);
+  }, [enabledAgents, isSpinning, isMultiplayer, canAct, roomState?.rolling, syncToRoom, playerId]);
+
+  const syncEnabled = useCallback(
+    (updated: IAgent[]) => {
+      setEnabledAgents(updated);
+      if (isMultiplayer) {
+        syncToRoom!({ enabledAgents: updated.map((a) => a.uuid) });
+      }
+    },
+    [isMultiplayer, syncToRoom]
+  );
 
   const handleEnabledAgent = useCallback(
     (agent: IAgent) => {
+      if (isMultiplayer && !canAct) return;
+
       const isEnabled = enabledAgents.some((item) => item.uuid === agent.uuid);
 
       const updated = isEnabled
         ? enabledAgents.filter((item) => item.uuid !== agent.uuid)
         : [...enabledAgents, agent];
 
-      setEnabledAgents(updated);
-
-      if (isMultiplayer) {
-        syncToRoom!({ enabledAgents: updated.map((a) => a.uuid) });
-      }
+      syncEnabled(updated);
     },
-    [enabledAgents, isMultiplayer, syncToRoom]
+    [enabledAgents, isMultiplayer, canAct, syncEnabled]
   );
 
-  const handleClearAgentButton = useCallback(() => {
-    if (agents) setEnabledAgents(agents);
-  }, [agents]);
+  const handleRoleToggle = useCallback(
+    (roleName: string) => {
+      if (isMultiplayer && !canAct) return;
+      if (!agents) return;
 
-  const handleSelectAllAgentButton = useCallback(() => {
-    setRandomAgent("");
-    setEnabledAgents([]);
-  }, []);
+      const roleAgents = agents.filter((a) => a.role.displayName === roleName);
+      if (!roleAgents.length) return;
+
+      const allEnabled = roleAgents.every((r) =>
+        enabledAgents.some((e) => e.uuid === r.uuid)
+      );
+
+      if (allEnabled) {
+        syncEnabled(enabledAgents.filter(
+          (e) => !roleAgents.some((r) => r.uuid === e.uuid)
+        ));
+      } else {
+        const existing = new Set(enabledAgents.map((a) => a.uuid));
+        syncEnabled([...enabledAgents, ...roleAgents.filter((a) => !existing.has(a.uuid))]);
+      }
+    },
+    [agents, enabledAgents, isMultiplayer, canAct, syncEnabled]
+  );
 
   const handleClickAgent = useCallback(() => {
+    if (isMultiplayer && !canAct) return;
     setRandomAgent("");
 
     if (isMultiplayer) {
@@ -125,7 +223,7 @@ export function useRoulette({
         agentDescription: "",
       });
     }
-  }, [isMultiplayer, syncToRoom]);
+  }, [isMultiplayer, canAct, syncToRoom]);
 
   const getAgentData = useCallback(
     (property: string) => {
@@ -162,12 +260,13 @@ export function useRoulette({
       isSpinning,
       isLoading,
       error: apiError,
+      isHost: !!isHost,
+      canAct,
     },
     actions: {
       handleClickButton,
       handleEnabledAgent,
-      handleClearAgentButton,
-      handleSelectAllAgentButton,
+      handleRoleToggle,
       handleClickAgent,
       getAgentData,
       getAgentClass,
