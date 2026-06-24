@@ -32,7 +32,7 @@ export function AgentOverview({
       <strong className="font-montserrat font-bold text-h4 uppercase tracking-widest text-valorant-cyan">
         {getAgentClass("displayName")}
       </strong>
-      <h2 className="text-8xl font-montserrat font-extrabold uppercase tracking-wide leading-none text-valorant-yellow">
+      <h2 className="text-6xl font-montserrat font-extrabold uppercase tracking-wide leading-none text-valorant-yellow">
         {getAgentData("displayName")}
       </h2>
 
@@ -57,13 +57,13 @@ export function AgentOverview({
             )
         )}
       </div>
-      <p className="break-words w-full my-1 font-prompt text-base font-semibold text-valorant-light">
+      <p className="break-words w-full font-prompt text-base font-semibold text-valorant-light">
         {typeof descriptionAbility === "object"
           ? descriptionAbility.description
           : getAgentClass("description")}
       </p>
 
-      <strong className="text-h3 font-montserrat font-bold uppercase tracking-wide text-white">
+      <strong className="text-h4 font-montserrat my-4 font-bold uppercase tracking-wide text-white">
         {getAgentClass("displayName")}
       </strong>
       <p className="w-full font-prompt text-base text-left text-white">

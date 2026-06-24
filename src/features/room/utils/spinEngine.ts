@@ -7,7 +7,8 @@ export interface SpinCallbacks {
 
 export function createSpinAnimation(
   agents: IAgent[],
-  callbacks: SpinCallbacks
+  callbacks: SpinCallbacks,
+  winner?: IAgent
 ): { cancel: () => void } {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -27,8 +28,12 @@ export function createSpinAnimation(
     timeoutId = setTimeout(() => {
       if (intervalId !== null) clearInterval(intervalId);
       if (!cancelled) {
-        const finalIndex = Math.floor(Math.random() * agents.length);
-        callbacks.onComplete(agents[finalIndex]);
+        if (winner) {
+          callbacks.onComplete(winner);
+        } else {
+          const finalIndex = Math.floor(Math.random() * agents.length);
+          callbacks.onComplete(agents[finalIndex]);
+        }
       }
     }, SPIN_DURATION);
   }

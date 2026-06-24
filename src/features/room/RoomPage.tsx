@@ -1,4 +1,6 @@
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
 import { useRoomPresence } from "../../hooks/useRoomPresence";
@@ -12,9 +14,10 @@ import { AgentPortrait } from "./components/AgentPortrait";
 import { AgentOverview } from "./components/AgentOverview";
 import { RouletteMessage } from "./components/RouletteMessage";
 import { CardAgents } from "./components/CardAgents";
+import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
 import { RoomAccessGate } from "./components/RoomAccessGate";
-import { leaveRoom } from "../../services/roomService";
+import { leaveRoom, transferHost } from "../../services/roomService";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
@@ -49,16 +52,57 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const isMultiplayer = mode === "multiplayer" && !!roomId;
 
   const { roomState, isConnected: isGameConnected, syncToRoom } = useRoom(
-    isMultiplayer ? roomId : undefined
+    isMultiplayer ? roomId : undefined,
+    isMultiplayer ? playerId : undefined
   );
 
   const { players, playerCount, isConnected: isPresenceConnected, currentPlayer } =
     useRoomPresence(isMultiplayer ? roomId : undefined, isMultiplayer ? playerId : undefined);
 
+  const isHost = currentPlayer?.isHost ?? false;
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
+      notifiedRef.current = true;
+      toast.info("Você entrou como participante. Somente o host pode iniciar a roleta e gerenciar os personagens do sorteio.", {
+        duration: 6000,
+      });
+    }
+  }, [isMultiplayer, currentPlayer, isHost]);
+
+  const handleTransferHost = useCallback((newHostId: string) => {
+    if (!roomId || !playerId) return;
+
+    const targetPlayer = players.find((p) => p.id === newHostId);
+    const targetName = targetPlayer?.name || "jogador";
+
+    toast(`Deseja transferir a liderança da sala para ${targetName}?`, {
+      duration: 8000,
+      action: {
+        label: "Confirmar",
+        onClick: async () => {
+          try {
+            await transferHost(roomId, playerId, newHostId);
+            toast.success(`${targetName} agora é o Host da Sala`);
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
+          }
+        },
+      },
+      cancel: {
+        label: "Cancelar",
+        onClick: () => {},
+      },
+    });
+  }, [roomId, playerId, players]);
+
   const { state, actions } = useRoulette({
     mode,
     roomState,
     syncToRoom: isMultiplayer ? syncToRoom : undefined,
+    playerId: isMultiplayer ? playerId : undefined,
+    isHost: isMultiplayer ? isHost : undefined,
   });
 
   const {
@@ -70,13 +114,13 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     isSpinning,
     isLoading,
     error,
+    canAct,
   } = state;
 
   const {
     handleClickButton,
     handleEnabledAgent,
-    handleClearAgentButton,
-    handleSelectAllAgentButton,
+    handleRoleToggle,
     handleClickAgent,
     getAgentData,
     getAgentClass,
@@ -150,6 +194,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             players={players}
             playerCount={playerCount}
             currentPlayerId={playerId}
+            onTransferHost={isHost ? handleTransferHost : undefined}
           />
         </div>
       )}
@@ -173,36 +218,37 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
       <RouletteMessage randomAgent={randomAgent} />
 
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-4">
         <Button
           title="Rodar"
           variant="primary"
           onClick={handleClickButton}
-          disabled={enabledAgents.length === 0}
+          disabled={enabledAgents.length === 0 || (isMultiplayer && !canAct)}
           loading={isSpinning}
+          tooltip={isMultiplayer && !canAct ? "Apenas o host da sala pode executar esta ação." : undefined}
         />
       </div>
 
       {agents && (
-        <CardAgents
-          agents={agents}
-          enabledAgents={enabledAgents}
-          randomAgent={randomAgent}
-          handleClickAgent={handleClickAgent}
-          handleEnabledAgent={handleEnabledAgent}
-        />
+        <>
+          <CardAgents
+            agents={agents}
+            enabledAgents={enabledAgents}
+            randomAgent={randomAgent}
+            handleClickAgent={handleClickAgent}
+            handleEnabledAgent={handleEnabledAgent}
+            canInteract={canAct}
+          />
+
+          <RoleFilter
+            agents={agents}
+            enabledAgents={enabledAgents}
+            onRoleToggle={handleRoleToggle}
+            canInteract={canAct}
+          />
+        </>
       )}
 
-      <div className="flex justify-center gap-4 mt-2">
-        <Button
-          title="Limpar seleção"
-          onClick={handleClearAgentButton}
-        />
-        <Button
-          title="Selecionar todos"
-          onClick={handleSelectAllAgentButton}
-        />
-      </div>
     </main>
   );
 }
