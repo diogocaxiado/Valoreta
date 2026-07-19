@@ -61,6 +61,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
   const isHost = currentPlayer?.isHost ?? false;
   const notifiedRef = useRef(false);
+  const prevHostIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
@@ -70,6 +71,39 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       });
     }
   }, [isMultiplayer, currentPlayer, isHost]);
+
+  useEffect(() => {
+    if (!isMultiplayer || !players.length || !currentPlayer) return;
+
+    const currentHost = players.find((p) => p.isHost);
+    const currentHostId = currentHost?.id ?? null;
+
+    if (prevHostIdRef.current !== null && currentHostId !== prevHostIdRef.current) {
+      const newHost = players.find((p) => p.id === currentHostId);
+      const newHostName = newHost?.name ?? "Um jogador";
+
+      if (currentHostId === playerId) {
+        toast.success("Você agora é o líder da sala.", {
+          description:
+            "Agora você pode iniciar a roleta, gerenciar os agentes participantes, alterar as configurações da sala e transferir a liderança para outro jogador.",
+          duration: 8000,
+        });
+      } else if (prevHostIdRef.current === playerId) {
+        toast.success(`Você transferiu a liderança da sala para ${newHostName}.`, {
+          description: "Agora você participa da sala como um jogador comum.",
+          duration: 8000,
+        });
+      } else {
+        toast.info(`${newHostName} agora é o novo líder da sala.`, {
+          duration: 6000,
+        });
+      }
+    }
+
+    if (currentHostId !== null) {
+      prevHostIdRef.current = currentHostId;
+    }
+  }, [isMultiplayer, players, currentPlayer, playerId]);
 
   const handleTransferHost = useCallback((newHostId: string) => {
     if (!roomId || !playerId) return;
@@ -84,7 +118,6 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         onClick: async () => {
           try {
             await transferHost(roomId, playerId, newHostId);
-            toast.success(`${targetName} agora é o Host da Sala`);
           } catch (err) {
             toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
           }
