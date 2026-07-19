@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
@@ -10,6 +10,14 @@ import { Background } from "../../common/components/Background/Background";
 import { Topbar } from "../../common/components/Topbar/Topbar";
 import { Button } from "../../common/components/Button/Button";
 import { Button as ShadcnButton } from "../../common/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "../../common/components/ui/dialog";
 import { AgentPortrait } from "./components/AgentPortrait";
 import { AgentOverview } from "./components/AgentOverview";
 import { RouletteMessage } from "./components/RouletteMessage";
@@ -18,7 +26,7 @@ import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
 import { RoomAccessGate } from "./components/RoomAccessGate";
 import { leaveRoom, transferHost } from "../../services/roomService";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 interface RoomPageProps {
@@ -62,6 +70,10 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const isHost = currentPlayer?.isHost ?? false;
   const notifiedRef = useRef(false);
   const prevHostIdRef = useRef<string | null>(null);
+  const [transferTarget, setTransferTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
@@ -107,28 +119,21 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
   const handleTransferHost = useCallback((newHostId: string) => {
     if (!roomId || !playerId) return;
-
     const targetPlayer = players.find((p) => p.id === newHostId);
     const targetName = targetPlayer?.name || "jogador";
-
-    toast(`Deseja transferir a liderança da sala para ${targetName}?`, {
-      duration: 8000,
-      action: {
-        label: "Confirmar",
-        onClick: async () => {
-          try {
-            await transferHost(roomId, playerId, newHostId);
-          } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
-          }
-        },
-      },
-      cancel: {
-        label: "Cancelar",
-        onClick: () => {},
-      },
-    });
+    setTransferTarget({ id: newHostId, name: targetName });
   }, [roomId, playerId, players]);
+
+  const handleConfirmTransfer = useCallback(async () => {
+    if (!roomId || !playerId || !transferTarget) return;
+    try {
+      await transferHost(roomId, playerId, transferTarget.id);
+      setTransferTarget(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
+      setTransferTarget(null);
+    }
+  }, [roomId, playerId, transferTarget]);
 
   const { state, actions } = useRoulette({
     mode,
@@ -281,6 +286,36 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           />
         </>
       )}
+
+      <Dialog open={transferTarget !== null} onOpenChange={(open) => { if (!open) setTransferTarget(null); }}>
+        <DialogContent className="border-cyan-400/50">
+          <DialogHeader>
+            <DialogTitle>Transferir liderança</DialogTitle>
+          </DialogHeader>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <XMarkIcon className="w-5 h-5" />
+          </DialogClose>
+          <DialogDescription className="my-6">
+            Deseja transferir a liderança da sala para <strong>{transferTarget?.name}</strong>?
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <ShadcnButton
+              variant="outline"
+              size="default"
+              onClick={() => setTransferTarget(null)}
+            >
+              Cancelar
+            </ShadcnButton>
+            <ShadcnButton
+              variant="default"
+              size="default"
+              onClick={handleConfirmTransfer}
+            >
+              Confirmar
+            </ShadcnButton>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </main>
   );
