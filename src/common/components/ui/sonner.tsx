@@ -5,7 +5,7 @@ type ToasterProps = React.ComponentProps<typeof Sonner>
 export function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
-      className="toaster group [&_[data-close-button]]:left-auto [&_[data-close-button]]:right-2 [&_[data-close-button]]:top-2"
+      className="toaster group [&_[data-close-button]]:!left-auto [&_[data-close-button]]:!right-2 [&_[data-close-button]]:!top-2 [&_[data-close-button]]:![transform:none]"
       toastOptions={{
         classNames: {
           toast:

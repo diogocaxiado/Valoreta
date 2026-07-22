@@ -2,9 +2,11 @@ import Image from "../../../assets/image/Valorant-Icon.png";
 
 interface RouletteMessageProps {
   randomAgent: string;
+  isMultiplayer?: boolean;
+  isHost?: boolean;
 }
 
-export function RouletteMessage({ randomAgent }: RouletteMessageProps) {
+export function RouletteMessage({ randomAgent, isMultiplayer, isHost }: RouletteMessageProps) {
   return (
     <section
       className={
@@ -29,6 +31,15 @@ export function RouletteMessage({ randomAgent }: RouletteMessageProps) {
         {!randomAgent && (
           <p className="text-center text-h4 z-10 text-valorant-cyan font-prompt">
             Vamos ver qual agente será o seu!
+          </p>
+        )}
+        {!randomAgent && isMultiplayer && (
+          <p className={`text-sm z-10 font-prompt ${
+            isHost ? "text-valorant-cyan/60" : "text-white/40"
+          }`}>
+            {isHost
+              ? "👑 Você é o Host — clique em Rodar para iniciar"
+              : "Aguardando o Host iniciar a roleta..."}
           </p>
         )}
       </div>
