@@ -238,6 +238,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             handleClickAgent={handleClickAgent}
             handleEnabledAgent={handleEnabledAgent}
             canInteract={canAct}
+            isSpinning={isSpinning}
           />
 
           <RoleFilter
@@ -245,6 +246,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             enabledAgents={enabledAgents}
             onRoleToggle={handleRoleToggle}
             canInteract={canAct}
+            hasResult={!!randomAgent}
           />
         </>
       )}

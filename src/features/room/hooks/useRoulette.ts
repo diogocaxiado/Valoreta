@@ -176,6 +176,7 @@ export function useRoulette({
   const handleEnabledAgent = useCallback(
     (agent: IAgent) => {
       if (isMultiplayer && !canAct) return;
+      if (randomAgent) return;
 
       const isEnabled = enabledAgents.some((item) => item.uuid === agent.uuid);
 
@@ -185,12 +186,13 @@ export function useRoulette({
 
       syncEnabled(updated);
     },
-    [enabledAgents, isMultiplayer, canAct, syncEnabled]
+    [enabledAgents, isMultiplayer, canAct, randomAgent, syncEnabled]
   );
 
   const handleRoleToggle = useCallback(
     (roleName: string) => {
       if (isMultiplayer && !canAct) return;
+      if (randomAgent) return;
       if (!agents) return;
 
       const roleAgents = agents.filter((a) => a.role.displayName === roleName);
@@ -209,7 +211,7 @@ export function useRoulette({
         syncEnabled([...enabledAgents, ...roleAgents.filter((a) => !existing.has(a.uuid))]);
       }
     },
-    [agents, enabledAgents, isMultiplayer, canAct, syncEnabled]
+    [agents, enabledAgents, isMultiplayer, canAct, randomAgent, syncEnabled]
   );
 
   const handleClickAgent = useCallback(() => {
