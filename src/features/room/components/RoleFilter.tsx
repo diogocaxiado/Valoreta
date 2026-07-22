@@ -71,7 +71,7 @@ export function RoleFilter({
           if (canInteract) {
             btnClass += " cursor-pointer hover:scale-105 hover:brightness-110";
           } else {
-            btnClass += " cursor-default";
+            btnClass += " cursor-default grayscale opacity-50 select-none";
           }
 
           return (
@@ -80,7 +80,9 @@ export function RoleFilter({
               className={btnClass}
               onClick={() => canInteract && onRoleToggle(role.displayName)}
               title={
-                allEnabled
+                !canInteract
+                  ? "Apenas o Host pode alterar os filtros"
+                  : allEnabled
                   ? `Desabilitar todos ${role.displayName}`
                   : `Habilitar todos ${role.displayName}`
               }

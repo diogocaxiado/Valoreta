@@ -95,18 +95,18 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       const newHostName = newHost?.name ?? "Um jogador";
 
       if (currentHostId === playerId) {
-        toast.success("Você agora é o líder da sala.", {
+        toast.success("Você agora é o Host da sala.", {
           description:
-            "Agora você pode iniciar a roleta, gerenciar os agentes participantes, alterar as configurações da sala e transferir a liderança para outro jogador.",
+            "Agora você pode iniciar a roleta, gerenciar os agentes participantes, alterar as configurações da sala e transferir o Host para outro jogador.",
           duration: 8000,
         });
       } else if (prevHostIdRef.current === playerId) {
-        toast.success(`Você transferiu a liderança da sala para ${newHostName}.`, {
+        toast.success(`Você transferiu o Host da sala para ${newHostName}.`, {
           description: "Agora você participa da sala como um jogador comum.",
           duration: 8000,
         });
       } else {
-        toast.info(`${newHostName} agora é o novo líder da sala.`, {
+        toast.info(`${newHostName} agora é o novo Host da sala.`, {
           duration: 6000,
         });
       }
@@ -232,6 +232,8 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             players={players}
             playerCount={playerCount}
             currentPlayerId={playerId}
+            isHost={isHost}
+            hostName={players.find((p) => p.isHost)?.name}
             onTransferHost={isHost ? handleTransferHost : undefined}
           />
         </div>
@@ -254,7 +256,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         />
       )}
 
-      <RouletteMessage randomAgent={randomAgent} />
+      <RouletteMessage randomAgent={randomAgent} isMultiplayer={isMultiplayer} isHost={isHost} />
 
       <div className="flex justify-center gap-4">
         <Button
@@ -263,6 +265,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           onClick={handleClickButton}
           disabled={enabledAgents.length === 0 || (isMultiplayer && !canAct)}
           loading={isSpinning}
+          restricted={isMultiplayer && !canAct}
           tooltip={isMultiplayer && !canAct ? "Apenas o host da sala pode executar esta ação." : undefined}
         />
       </div>
@@ -290,13 +293,13 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       <Dialog open={transferTarget !== null} onOpenChange={(open) => { if (!open) setTransferTarget(null); }}>
         <DialogContent className="border-cyan-400/50">
           <DialogHeader>
-            <DialogTitle>Transferir liderança</DialogTitle>
+            <DialogTitle>Transferir Host</DialogTitle>
           </DialogHeader>
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
             <XMarkIcon className="w-5 h-5" />
           </DialogClose>
           <DialogDescription className="my-6">
-            Deseja transferir a liderança da sala para <strong>{transferTarget?.name}</strong>?
+            Deseja transferir o Host da sala para <strong>{transferTarget?.name}</strong>?
           </DialogDescription>
           <div className="flex justify-end gap-2">
             <ShadcnButton

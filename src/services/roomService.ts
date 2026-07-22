@@ -115,7 +115,7 @@ export async function transferHost(
   const snap = await get(child(ref(db), `room/${roomId}/hostId`));
   const storedHostId = snap.val();
   if (!storedHostId || storedHostId !== currentPlayerId) {
-    throw new Error("Apenas o host atual pode transferir a liderança.");
+    throw new Error("Apenas o host atual pode transferir o Host.");
   }
 
   await update(ref(db), {
