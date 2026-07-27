@@ -78,7 +78,8 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
       notifiedRef.current = true;
-      toast.info("Você entrou como participante. Somente o host pode iniciar a roleta e gerenciar os personagens do sorteio.", {
+      toast.info("Você entrou como Participante", {
+        description: "Somente o Host pode iniciar a roleta e gerenciar os personagens do sorteio.",
         duration: 6000,
       });
     }
@@ -95,13 +96,13 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       const newHostName = newHost?.name ?? "Um jogador";
 
       if (currentHostId === playerId) {
-        toast.success("Você agora é o Host da sala.", {
+        toast.success("Você agora é o Host da sala", {
           description:
             "Agora você pode iniciar a roleta, gerenciar os agentes participantes, alterar as configurações da sala e transferir o Host para outro jogador.",
           duration: 8000,
         });
       } else if (prevHostIdRef.current === playerId) {
-        toast.success(`Você transferiu o Host da sala para ${newHostName}.`, {
+        toast.success(`Host transferido para ${newHostName}`, {
           description: "Agora você participa da sala como um jogador comum.",
           duration: 8000,
         });
