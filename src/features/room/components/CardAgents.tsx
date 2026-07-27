@@ -8,6 +8,7 @@ interface CardAgentsProps {
   handleClickAgent: () => void;
   handleEnabledAgent: (agent: IAgent) => void;
   canInteract?: boolean;
+  isSpinning?: boolean;
 }
 
 export function CardAgents({
@@ -17,6 +18,7 @@ export function CardAgents({
   handleClickAgent,
   handleEnabledAgent,
   canInteract = true,
+  isSpinning = false,
 }: CardAgentsProps) {
   function isAgentEnabled(agent: IAgent) {
     return enabledAgents?.some((item) => item.uuid === agent.uuid);
@@ -24,10 +26,12 @@ export function CardAgents({
 
   function handleChoiceAgent(agent: IAgent) {
     if (!canInteract) return;
+    if (isSpinning) return;
     if (randomAgent === agent.uuid) {
       handleClickAgent();
       return;
     }
+    if (randomAgent) return;
 
     handleEnabledAgent(agent);
   }
@@ -49,7 +53,6 @@ export function CardAgents({
 
         {agents.map((agent) => {
           const enabled = isAgentEnabled(agent);
-
           const isWinner = randomAgent === agent.uuid;
 
           let agentSelected =

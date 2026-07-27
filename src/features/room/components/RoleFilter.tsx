@@ -6,6 +6,7 @@ interface RoleFilterProps {
   enabledAgents: IAgent[];
   onRoleToggle: (roleName: string) => void;
   canInteract?: boolean;
+  hasResult?: boolean;
 }
 
 interface RoleInfo {
@@ -20,6 +21,7 @@ export function RoleFilter({
   enabledAgents,
   onRoleToggle,
   canInteract = true,
+  hasResult = false,
 }: RoleFilterProps) {
   const roles = useMemo(() => {
     const map = new Map<string, RoleInfo>();
@@ -68,7 +70,9 @@ export function RoleFilter({
               "border-yellow-500 bg-white/5 text-white/80 opacity-80";
           }
 
-          if (canInteract) {
+          if (hasResult) {
+            btnClass += " cursor-not-allowed opacity-50";
+          } else if (canInteract) {
             btnClass += " cursor-pointer hover:scale-105 hover:brightness-110";
           } else {
             btnClass += " cursor-default grayscale opacity-50 select-none";
@@ -78,7 +82,7 @@ export function RoleFilter({
             <button
               key={role.displayName}
               className={btnClass}
-              onClick={() => canInteract && onRoleToggle(role.displayName)}
+              onClick={() => canInteract && !hasResult && onRoleToggle(role.displayName)}
               title={
                 !canInteract
                   ? "Apenas o Host pode alterar os filtros"
