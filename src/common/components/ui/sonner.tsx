@@ -9,8 +9,9 @@ export function Toaster({ ...props }: ToasterProps) {
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-card group-[.toaster]:text-card-foreground group-[.toaster]:border group-[.toaster]:border-border/50 group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
+            "group toast group-[.toaster]:bg-card group-[.toaster]:text-card-foreground group-[.toaster]:border group-[.toaster]:border-border/50 group-[.toaster]:shadow-lg group-[.toast]:max-w-[380px] group-[.toast]:w-full",
+          title: "group-[.toast]:font-montserrat group-[.toast]:font-bold group-[.toast]:text-sm group-[.toast]:leading-snug",
+          description: "group-[.toast]:text-muted-foreground group-[.toast]:font-prompt group-[.toast]:text-sm group-[.toast]:leading-relaxed group-[.toast]:mt-1",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton:

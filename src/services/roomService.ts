@@ -1,4 +1,4 @@
-import { ref, set, update, onValue, get, child, remove, onDisconnect } from "firebase/database";
+import { ref, set, update, onValue, get, child, remove, onDisconnect, runTransaction } from "firebase/database";
 import { db } from "../infra/firebase/config";
 
 export interface RoomState {
@@ -93,6 +93,186 @@ export async function joinRoom({
     joinedAt: Date.now(),
     isHost: false,
   });
+}
+
+export class RoomFullError extends Error {
+  current: number;
+  max: number;
+  constructor(current: number, max: number) {
+    super(`Sala cheia: ${current}/${max}`);
+    this.name = "RoomFullError";
+    this.current = current;
+    this.max = max;
+  }
+}
+
+export class RoomNotFoundError extends Error {
+  constructor() {
+    super("Sala não encontrada.");
+    this.name = "RoomNotFoundError";
+  }
+}
+
+export async function joinRoomAtomic({
+  roomId,
+  playerId,
+  playerName,
+}: JoinRoomParams): Promise<void> {
+  const roomSnapshot = await get(child(ref(db), `room/${roomId}`));
+  const roomData = roomSnapshot.val() as Omit<RoomData, "state"> | null;
+
+  if (!roomData) {
+    throw new RoomNotFoundError();
+  }
+
+  const playersRef = ref(db, `room/${roomId}/players`);
+
+  const result = await runTransaction(playersRef, (currentPlayers: Record<string, PlayerData> | null) => {
+    if (!currentPlayers) {
+      currentPlayers = {};
+    }
+
+    if (currentPlayers[playerId]) {
+      return currentPlayers;
+    }
+
+    const count = Object.keys(currentPlayers).length;
+    const max = roomData.maxPlayers || MAX_PLAYERS;
+
+    if (count >= max) {
+      return undefined;
+    }
+
+    currentPlayers[playerId] = {
+      name: playerName,
+      joinedAt: Date.now(),
+      isHost: false,
+    };
+
+    return currentPlayers;
+  });
+
+  if (result.committed) {
+    const snap = result.snapshot;
+    const updatedPlayers = snap.val() as Record<string, PlayerData> | null;
+    if (updatedPlayers) {
+      const finalCount = Object.keys(updatedPlayers).length;
+      const max = roomData.maxPlayers || MAX_PLAYERS;
+      if (finalCount > max) {
+        await remove(ref(db, `room/${roomId}/players/${playerId}`));
+        throw new RoomFullError(finalCount, max);
+      }
+    }
+  } else {
+    throw new Error("Não foi possível entrar na sala. Tente novamente.");
+  }
+}
+
+export async function rejoinRoomAtomic(
+  roomId: string,
+  playerId: string,
+  playerName: string
+): Promise<void> {
+  const roomSnapshot = await get(child(ref(db), `room/${roomId}`));
+  const roomData = roomSnapshot.val() as Omit<RoomData, "state"> | null;
+
+  if (!roomData) {
+    throw new RoomNotFoundError();
+  }
+
+  const playersRef = ref(db, `room/${roomId}/players`);
+
+  const result = await runTransaction(playersRef, (currentPlayers: Record<string, PlayerData> | null) => {
+    if (!currentPlayers) {
+      currentPlayers = {};
+    }
+
+    if (currentPlayers[playerId]) {
+      currentPlayers[playerId].name = playerName;
+      currentPlayers[playerId].joinedAt = Date.now();
+      return currentPlayers;
+    }
+
+    const count = Object.keys(currentPlayers).length;
+    const max = roomData.maxPlayers || MAX_PLAYERS;
+
+    if (count >= max) {
+      return undefined;
+    }
+
+    currentPlayers[playerId] = {
+      name: playerName,
+      joinedAt: Date.now(),
+      isHost: false,
+    };
+
+    return currentPlayers;
+  });
+
+  if (result.committed) {
+    const snap = result.snapshot;
+    const updatedPlayers = snap.val() as Record<string, PlayerData> | null;
+    if (updatedPlayers) {
+      const finalCount = Object.keys(updatedPlayers).length;
+      const max = roomData.maxPlayers || MAX_PLAYERS;
+      if (finalCount > max && !updatedPlayers[playerId]) {
+        throw new RoomFullError(finalCount, max);
+      }
+    }
+  } else {
+    throw new Error("Não foi possível reconectar à sala. Tente novamente.");
+  }
+}
+
+export async function autoRejoinAtomic(
+  roomId: string,
+  playerId: string,
+  playerName: string
+): Promise<boolean> {
+  const roomSnapshot = await get(child(ref(db), `room/${roomId}`));
+  const roomData = roomSnapshot.val() as Omit<RoomData, "state"> | null;
+
+  if (!roomData || !roomData.players || Object.keys(roomData.players).length === 0) {
+    return false;
+  }
+
+  const playersRef = ref(db, `room/${roomId}/players`);
+
+  const result = await runTransaction(playersRef, (currentPlayers: Record<string, PlayerData> | null) => {
+    if (!currentPlayers) {
+      return null;
+    }
+
+    if (currentPlayers[playerId]) {
+      return currentPlayers;
+    }
+
+    const count = Object.keys(currentPlayers).length;
+    const max = roomData.maxPlayers || MAX_PLAYERS;
+
+    if (count >= max) {
+      return null;
+    }
+
+    const shouldBeHost = roomData.hostId === playerId;
+    currentPlayers[playerId] = {
+      name: playerName,
+      joinedAt: Date.now(),
+      isHost: shouldBeHost,
+    };
+
+    return currentPlayers;
+  });
+
+  if (result.committed) {
+    const snap = result.snapshot;
+    const updatedPlayers = snap.val() as Record<string, PlayerData> | null | false;
+    if (updatedPlayers && typeof updatedPlayers === "object" && updatedPlayers[playerId]) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function rejoinRoom(
@@ -190,7 +370,7 @@ export function subscribeRoomData(
 
 export function subscribeRoomPlayers(
   roomId: string,
-  callback: (players: Record<string, PlayerData> | null) => void
+  callback: (players: Record<string, PlayerData> | null) => void | Promise<void>
 ) {
   return onValue(ref(db, `room/${roomId}/players`), (snapshot) => {
     callback(snapshot.val());

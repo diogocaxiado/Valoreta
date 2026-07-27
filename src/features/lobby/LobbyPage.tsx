@@ -123,8 +123,8 @@ export function LobbyPage() {
             </div>
 
             {validationError && (
-              <div className="mt-3 p-3 rounded-sm bg-destructive/20 border border-destructive/50">
-                <p className="text-sm text-destructive-foreground font-prompt">
+              <div className="mt-3 p-3 rounded-sm bg-destructive/20 border border-destructive/50 max-w-sm">
+                <p className="text-sm text-destructive-foreground font-prompt leading-relaxed">
                   {validationError.message}
                 </p>
                 {validationError.code === "ROOM_FULL" && "current" in validationError && (
