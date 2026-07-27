@@ -37,55 +37,38 @@ export function CardAgents({
   }
 
   const isParticipant = !canInteract;
-  const hasResult = !!randomAgent;
 
   return (
     <section className="flex justify-center items-center relative z-10">
       <div
         className={`flex flex-wrap justify-center items-center gap-1 w-2/4 p-3 mt-2 border-2 border-white/50 bg-black/80 relative ${
-          hasResult ? "mr-8" : ""
+          randomAgent ? "mr-8" : ""
         } ${isParticipant ? "grayscale-[30%] after:absolute after:inset-0 after:bg-black/20 after:pointer-events-none" : ""}`}
       >
+        {isParticipant && (
+          <span className="absolute top-2 right-2 z-10 text-[10px] font-montserrat font-bold uppercase tracking-wider text-white/50 bg-black/60 px-2 py-1 rounded-sm border border-white/10 pointer-events-none">
+            👤 Somente visualização
+          </span>
+        )}
+
         {agents.map((agent) => {
           const enabled = isAgentEnabled(agent);
           const isWinner = randomAgent === agent.uuid;
 
-          let agentSelected: string;
+          let agentSelected =
+            isWinner
+              ? "w-20 p-1 opacity-100 transition-opacity duration-300 ease-in-out border-2 border-valorant-green bg-white/10 shadow-[0_0_12px_rgba(30,255,60,0.4)]"
+              : "w-20 p-1 opacity-50 transition-all duration-300 ease-in-out border-2 border-white/30 bg-white/10";
 
-          if (hasResult) {
-            if (isWinner) {
-              agentSelected = isParticipant
-                ? "w-20 p-1 cursor-default opacity-100 transition-opacity duration-300 ease-in-out border-2 border-valorant-green bg-white/10 shadow-[0_0_12px_rgba(30,255,60,0.4)]"
-                : "w-20 p-1 cursor-pointer opacity-100 transition-all duration-300 ease-in-out border-2 border-valorant-green bg-white/10 shadow-[0_0_12px_rgba(30,255,60,0.4)] hover:scale-105";
-            } else {
-              agentSelected =
-                "w-20 p-1 cursor-not-allowed opacity-40 transition-opacity duration-300 ease-in-out border-2 border-white/20 bg-white/5";
-            }
-          } else if (isSpinning) {
-            agentSelected =
-              "w-20 p-1 cursor-not-allowed opacity-50 transition-opacity duration-300 ease-in-out border-2 border-white/30 bg-white/5";
-          } else if (isParticipant) {
-            agentSelected =
-              "w-20 p-1 cursor-default border-2 border-inset border-white/50 bg-white/5 opacity-60";
-          } else {
-            agentSelected =
-              "w-20 p-1 cursor-pointer border-2 border-inset border-white/50 bg-white/5 hover:transition-all hover:ease-in-out hover:duration-75 hover:scale-105";
+          if (!randomAgent) {
+            agentSelected = isParticipant
+              ? "w-20 p-1 cursor-default border-2 border-inset border-white/50 bg-white/5 opacity-60"
+              : "w-20 p-1 cursor-pointer border-2 border-inset border-white/50 bg-white/5 hover:transition-all hover:ease-in-out hover:duration-75 hover:scale-105";
           }
 
-          if (!enabled && !isWinner && !hasResult) {
-            agentSelected +=
-              " border-2 border-white/30 bg-black/30 opacity-40";
-          }
-
-          let cardTitle: string | undefined;
-          if (isSpinning) {
-            cardTitle = "Aguarde a animação terminar";
-          } else if (isWinner && canInteract) {
-            cardTitle = "Clique para limpar o resultado";
-          } else if (hasResult && !isWinner) {
-            cardTitle = "Aguarde para interagir";
-          } else if (!canInteract) {
-            cardTitle = "Apenas o Host pode gerenciar os agentes";
+          if (!enabled && !isWinner) {
+            agentSelected =
+              "w-20 p-1 cursor-pointer border-2 border-2 border-white/30 bg-black/30 transition-all duration-300 ease-in-out";
           }
 
           return (
@@ -93,7 +76,7 @@ export function CardAgents({
               key={agent.uuid}
               className={`${agentSelected} relative`}
               onClick={() => handleChoiceAgent(agent)}
-              title={cardTitle}
+              title={!canInteract ? "Apenas o Host pode gerenciar os agentes" : undefined}
             >
               {!enabled && !isWinner && (
                 <XMarkIcon className="absolute top-1 left-1 w-6 h-6 text-red-500" />

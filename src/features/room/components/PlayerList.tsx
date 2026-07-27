@@ -6,6 +6,8 @@ interface PlayerListProps {
   players: PlayerInfo[]
   playerCount: number
   currentPlayerId?: string
+  isHost?: boolean
+  hostName?: string
   onTransferHost?: (newHostId: string) => void
 }
 
@@ -13,6 +15,8 @@ export function PlayerList({
   players,
   playerCount,
   currentPlayerId,
+  isHost,
+  hostName,
   onTransferHost,
 }: PlayerListProps) {
   return (
@@ -20,6 +24,29 @@ export function PlayerList({
       <div className="text-small font-prompt text-muted-foreground uppercase tracking-wider mb-3">
         Jogadores ({playerCount}/{MAX_PLAYERS})
       </div>
+
+      {isHost !== undefined && (
+        <div className={`flex items-center gap-1.5 px-2 py-1.5 mb-2 rounded-sm border ${
+          isHost
+            ? "border-valorant-yellow/30 bg-valorant-yellow/5"
+            : "border-white/10 bg-white/5"
+        }`}>
+          <span className="text-[10px] font-montserrat font-bold uppercase tracking-wider text-white/50">
+            Você é:
+          </span>
+          <span className={`text-[10px] font-montserrat font-bold uppercase tracking-wider ${
+            isHost ? "text-valorant-yellow" : "text-white/60"
+          }`}>
+            {isHost ? "👑 Host" : "👤 Participante"}
+          </span>
+        </div>
+      )}
+
+      {isHost === false && hostName && (
+        <p className="text-[10px] text-white/30 font-prompt px-2 mb-2">
+          Host atual: <span className="text-white/50">{hostName}</span>
+        </p>
+      )}
 
       <div className="flex flex-col gap-1.5">
         {players.map((player) => {
@@ -64,7 +91,7 @@ export function PlayerList({
                   }}
                   className="ml-auto text-[10px] font-montserrat font-bold uppercase tracking-wider
                     text-cyan-400/70 hover:text-cyan-300 transition-colors cursor-pointer bg-transparent border-0"
-                  title="Transferir liderança"
+                  title="Transferir Host"
                 >
                   Transferir
                 </button>

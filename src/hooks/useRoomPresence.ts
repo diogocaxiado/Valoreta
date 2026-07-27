@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react"
-import { ref, set } from "firebase/database"
-import { db } from "../infra/firebase/config"
 import {
   subscribeRoomPlayers,
   setupPlayerPresence,
   cancelPresence,
   leaveRoom,
-  fetchRoomData,
+  autoRejoinAtomic,
   type PlayerData,
 } from "../services/roomService"
 import { getPlayerName } from "../services/playerSession"
@@ -37,7 +35,7 @@ export function useRoomPresence(
     setIsConnected(true)
     const presence = setupPlayerPresence(roomId, playerId)
 
-    const unsubscribe = subscribeRoomPlayers(roomId, (data) => {
+    const unsubscribe = subscribeRoomPlayers(roomId, async (data) => {
       if (!data) {
         setPlayers([])
         return
@@ -49,14 +47,7 @@ export function useRoomPresence(
         rejoinedOnce.current = true
         const playerName = getPlayerName()
         if (playerName) {
-          fetchRoomData(roomId).then((room) => {
-            const shouldBeHost = room?.hostId === playerId
-            set(ref(db, `room/${roomId}/players/${playerId}`), {
-              name: playerName,
-              joinedAt: Date.now(),
-              isHost: shouldBeHost,
-            })
-          })
+          await autoRejoinAtomic(roomId, playerId, playerName)
         }
       }
 
