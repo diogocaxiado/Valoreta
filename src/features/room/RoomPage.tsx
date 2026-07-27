@@ -26,7 +26,7 @@ import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
 import { RoomAccessGate } from "./components/RoomAccessGate";
 import { leaveRoom, transferHost } from "../../services/roomService";
-import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 interface RoomPageProps {
@@ -74,6 +74,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     id: string;
     name: string;
   } | null>(null);
+  const [codeVisible, setCodeVisible] = useState(false);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
@@ -216,7 +217,44 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       </div>
 
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-        <Topbar title={isMultiplayer ? `Sala: ${roomId}` : "Solo"} />
+        {isMultiplayer ? (
+          <div className="relative w-fit mx-auto">
+            <div
+              className="
+                flex items-center gap-3
+                px-6 py-2
+                border border-cyan-400 border-t-0
+                bg-gradient-to-b from-cyan-800/30 to-transparent
+                shadow-[0_0_15px_rgba(0,255,255,0.7)]
+                backdrop-blur-sm
+              "
+            >
+              <span className="text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
+                Sala:
+              </span>
+              <span className="text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
+                <span className="invisible">{roomId}</span>
+                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-2xl" : "text-4xl"}`}>
+                  {codeVisible ? roomId : "•".repeat(roomId!.length)}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setCodeVisible((v) => !v)}
+                className="text-white/50 hover:text-white transition-colors p-1 rounded-sm cursor-pointer"
+                title={codeVisible ? "Ocultar código da sala" : "Mostrar código da sala"}
+              >
+                {codeVisible ? (
+                  <EyeIcon className="w-5 h-5" />
+                ) : (
+                  <EyeSlashIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Topbar title="Solo" />
+        )}
         {isMultiplayer && (
           <span
             className={`w-3 h-3 rounded-full ${
