@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { IAgent, IAgentAbilities } from "../../../types";
 import { fetchAgents } from "../../../infra/valorant/valorantService";
 import { createSpinAnimation } from "../utils/spinEngine";
-import { RoomState } from "../../../services/roomService";
+import { RoomState, recordRoomHistory, RoomHistoryEntry } from "../../../services/roomService";
+import { recordSoloHistory } from "../../../services/soloHistory";
 
 interface UseRouletteOptions {
   mode: "solo" | "multiplayer";
+  roomId?: string;
   roomState?: RoomState | null;
   syncToRoom?: (data: Partial<RoomState>) => void;
   playerId?: string;
@@ -17,6 +19,7 @@ const ROLL_DURATION = 2000;
 
 export function useRoulette({
   mode,
+  roomId,
   roomState,
   syncToRoom,
   playerId,
@@ -45,6 +48,47 @@ export function useRoulette({
   const [isSpinning, setIsSpinning] = useState(false);
 
   const spinRef = useRef<{ cancel: () => void } | null>(null);
+
+  const recordRoll = useCallback(
+    (
+      winner: IAgent,
+      rollState: Pick<RoomState, "rollId" | "rollStartedAt" | "rollInitiatedBy">
+    ) => {
+      if (!isMultiplayer || !roomId) return;
+      if (!rollState.rollInitiatedBy || rollState.rollInitiatedBy !== playerId) return;
+
+      const historyId =
+        rollState.rollId ||
+        `legacy_${rollState.rollStartedAt ?? Date.now()}_${rollState.rollInitiatedBy}`;
+
+      const entry: RoomHistoryEntry = {
+        historyId,
+        agentUuid: winner.uuid,
+        agentName: winner.displayName,
+        agentIcon: winner.displayIcon,
+        rolledAt: (rollState.rollStartedAt ?? Date.now()) + ROLL_DURATION,
+        rolledBy: rollState.rollInitiatedBy,
+      };
+
+      recordRoomHistory(roomId, entry).catch((err) => {
+        console.error("Falha ao salvar histórico do sorteio", err);
+      });
+    },
+    [isMultiplayer, roomId, playerId]
+  );
+
+  const recordSoloRoll = useCallback((winner: IAgent) => {
+    const entry: RoomHistoryEntry = {
+      historyId: `solo_${crypto.randomUUID()}`,
+      agentUuid: winner.uuid,
+      agentName: winner.displayName,
+      agentIcon: winner.displayIcon,
+      rolledAt: Date.now(),
+      rolledBy: "solo",
+    };
+
+    recordSoloHistory(entry);
+  }, []);
 
   useEffect(() => {
     if (agents) {
@@ -104,6 +148,7 @@ export function useRoulette({
 
       if (roomState.rollInitiatedBy === playerId) {
         syncToRoom!({ rolling: false });
+        recordRoll(winnerAgent, roomState);
       }
 
       setIsSpinning(false);
@@ -119,6 +164,7 @@ export function useRoulette({
 
         if (roomState.rollInitiatedBy === playerId) {
           syncToRoom!({ rolling: false });
+          recordRoll(winnerAgent, roomState);
         }
 
         setIsSpinning(false);
@@ -126,7 +172,7 @@ export function useRoulette({
     }, winnerAgent);
 
     spinRef.current = animation;
-  }, [roomState?.rolling, roomState?.rollWinner, agents, isMultiplayer, syncToRoom, playerId, enabledAgents]);
+  }, [roomState?.rolling, roomState?.rollWinner, agents, isMultiplayer, syncToRoom, playerId, enabledAgents, recordRoll]);
 
   const handleClickButton = useCallback(() => {
     if (!enabledAgents.length || isSpinning) return;
@@ -137,6 +183,7 @@ export function useRoulette({
 
       syncToRoom!({
         rolling: true,
+        rollId: crypto.randomUUID(),
         rollWinner: winner.uuid,
         rollStartedAt: Date.now(),
         rollInitiatedBy: playerId,
@@ -156,6 +203,7 @@ export function useRoulette({
       onComplete: (agent) => {
         setRandomAgent(agent.uuid);
         setAbilities(agent.abilities);
+        recordSoloRoll(agent);
         setIsSpinning(false);
       },
     });

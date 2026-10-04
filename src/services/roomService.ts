@@ -1,4 +1,4 @@
-import { ref, set, update, onValue, get, child, remove, onDisconnect, runTransaction } from "firebase/database";
+import { ref, set, update, onValue, get, child, remove, onDisconnect, runTransaction, query, orderByChild, limitToLast } from "firebase/database";
 import { db } from "../infra/firebase/config";
 
 export interface RoomState {
@@ -15,6 +15,16 @@ export interface RoomState {
   rollWinner?: string;
   rollStartedAt?: number;
   rollInitiatedBy?: string;
+  rollId?: string;
+}
+
+export interface RoomHistoryEntry {
+  historyId: string;
+  agentUuid: string;
+  agentName: string;
+  agentIcon: string;
+  rolledAt: number;
+  rolledBy: string;
 }
 
 export interface PlayerData {
@@ -35,6 +45,8 @@ export interface RoomData {
 }
 
 export const MAX_PLAYERS = 5;
+
+export const HISTORY_LIMIT = 5;
 
 function roomRef(roomId: string) {
   return ref(db, `room/${roomId}`);
@@ -402,5 +414,55 @@ export function subscribeToRoom(
 ) {
   return onValue(roomDataRef(roomId), (snapshot) => {
     callback(snapshot.val());
+  });
+}
+
+export async function recordRoomHistory(
+  roomId: string,
+  entry: RoomHistoryEntry
+): Promise<void> {
+  const historyRef = ref(db, `room/${roomId}/history`);
+
+  await runTransaction(historyRef, (current: Record<string, RoomHistoryEntry> | null) => {
+    const map = current ?? {};
+
+    map[entry.historyId] = entry;
+
+    const existing = Object.values(map);
+    if (existing.length > HISTORY_LIMIT) {
+      const sorted = [...existing].sort((a, b) => a.rolledAt - b.rolledAt);
+      const toRemove = sorted.slice(0, existing.length - HISTORY_LIMIT);
+      toRemove.forEach((e) => {
+        delete map[e.historyId];
+      });
+    }
+
+    return map;
+  });
+}
+
+export function subscribeRoomHistory(
+  roomId: string,
+  callback: (entries: RoomHistoryEntry[] | null) => void
+) {
+  const historyQuery = query(
+    ref(db, `room/${roomId}/history`),
+    orderByChild("rolledAt"),
+    limitToLast(HISTORY_LIMIT)
+  );
+
+  return onValue(historyQuery, (snapshot) => {
+    const val = snapshot.val() as Record<string, RoomHistoryEntry> | null;
+    if (!val) {
+      callback(null);
+      return;
+    }
+
+    const entries = Object.entries(val).map(([key, entry]) => ({
+      ...entry,
+      historyId: entry.historyId ?? key,
+    }));
+
+    callback(entries);
   });
 }
