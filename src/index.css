@@ -52,3 +52,12 @@
       0 0 40px #00ffff;
   }
 }
+
+@keyframes history-cascade-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

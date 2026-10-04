@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
 import { useRoomPresence } from "../../hooks/useRoomPresence";
+import { useRoomHistory } from "../../hooks/useRoomHistory";
 import { getPlayerId } from "../../services/playerSession";
 
 import { Background } from "../../common/components/Background/Background";
@@ -24,6 +25,7 @@ import { RouletteMessage } from "./components/RouletteMessage";
 import { CardAgents } from "./components/CardAgents";
 import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
+import { HistoryPanel } from "./components/HistoryPanel";
 import { RoomAccessGate } from "./components/RoomAccessGate";
 import { leaveRoom, transferHost } from "../../services/roomService";
 import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
@@ -66,6 +68,10 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
   const { players, playerCount, isConnected: isPresenceConnected, currentPlayer } =
     useRoomPresence(isMultiplayer ? roomId : undefined, isMultiplayer ? playerId : undefined);
+
+  const { history } = useRoomHistory(isMultiplayer ? roomId : undefined);
+
+  const [historyVisible, setHistoryVisible] = useState(true);
 
   const isHost = currentPlayer?.isHost ?? false;
   const notifiedRef = useRef(false);
@@ -139,6 +145,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
   const { state, actions } = useRoulette({
     mode,
+    roomId: isMultiplayer ? roomId : undefined,
     roomState,
     syncToRoom: isMultiplayer ? syncToRoom : undefined,
     playerId: isMultiplayer ? playerId : undefined,
@@ -330,6 +337,14 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           />
         </>
       )}
+
+      <div className="absolute bottom-4 left-4 z-20">
+        <HistoryPanel
+          entries={history}
+          visible={historyVisible}
+          onToggleVisible={() => setHistoryVisible((v) => !v)}
+        />
+      </div>
 
       <Dialog open={transferTarget !== null} onOpenChange={(open) => { if (!open) setTransferTarget(null); }}>
         <DialogContent className="border-cyan-400/50">

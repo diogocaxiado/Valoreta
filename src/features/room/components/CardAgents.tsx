@@ -57,7 +57,7 @@ export function CardAgents({
 
           let agentSelected =
             isWinner
-              ? "w-20 p-1 opacity-100 transition-opacity duration-300 ease-in-out border-2 border-valorant-green bg-white/10 shadow-[0_0_12px_rgba(30,255,60,0.4)]"
+              ? "w-20 p-1 opacity-100 transition-opacity duration-300 ease-in-out border-2 border-valorant-green bg-white/10 shadow-[0_0_12px_rgba(30,255,60,0.4)] cursor-pointer hover:scale-105 hover:transition-all hover:ease-in-out hover:duration-75"
               : "w-20 p-1 opacity-50 transition-all duration-300 ease-in-out border-2 border-white/30 bg-white/10";
 
           if (!randomAgent) {
