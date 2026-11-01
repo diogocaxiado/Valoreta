@@ -28,7 +28,8 @@ import { PlayerList } from "./components/PlayerList";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { RoomAccessGate } from "./components/RoomAccessGate";
 import { leaveRoom, transferHost } from "../../services/roomService";
-import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon, LinkIcon, CheckIcon } from "@heroicons/react/24/solid";
+import { buildRoomShareUrl, copyToClipboard } from "../../lib/clipboard";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 interface RoomPageProps {
@@ -81,6 +82,23 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     name: string;
   } | null>(null);
   const [codeVisible, setCodeVisible] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const handleCopyRoomUrl = useCallback(async () => {
+    if (!roomId) return;
+    const shareUrl = buildRoomShareUrl(roomId);
+    const ok = await copyToClipboard(shareUrl);
+    if (ok) {
+      setCopiedUrl(true);
+      toast.success("Link da sala copiado!", {
+        description: "Envie a URL para seus amigos entrarem na sala.",
+        duration: 4000,
+      });
+      setTimeout(() => setCopiedUrl(false), 2500);
+    } else {
+      toast.error("Não foi possível copiar o link.");
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
@@ -255,6 +273,32 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
                   <EyeIcon className="w-5 h-5" />
                 ) : (
                   <EyeSlashIcon className="w-5 h-5" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyRoomUrl}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-montserrat font-bold uppercase tracking-wider
+                  transition-all duration-150 cursor-pointer ml-1
+                  ${
+                    copiedUrl
+                      ? "bg-valorant-green/20 text-valorant-green border border-valorant-green/50 shadow-[0_0_10px_rgba(30,255,60,0.3)]"
+                      : "bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.2)]"
+                  }
+                `}
+                title="Copiar link da sala para enviar aos amigos"
+              >
+                {copiedUrl ? (
+                  <>
+                    <CheckIcon className="w-4 h-4 text-valorant-green" />
+                    <span>Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="w-4 h-4" />
+                    <span>Copiar link</span>
+                  </>
                 )}
               </button>
             </div>
