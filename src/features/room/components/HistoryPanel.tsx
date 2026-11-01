@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import type { RoomHistoryEntry } from "../../../services/roomService";
 
@@ -17,7 +17,7 @@ function formatTime(rolledAt: number) {
 
 function HistoryRow({ entry }: { entry: RoomHistoryEntry }) {
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm bg-white/5 border border-white/10">
+    <div className="flex items-center gap-2 px-2 py-1.5 rounded-sm text-sm bg-white/5 border border-white/10 shrink-0">
       <img
         src={entry.agentIcon}
         alt={entry.agentName}
@@ -35,6 +35,37 @@ function HistoryRow({ entry }: { entry: RoomHistoryEntry }) {
   );
 }
 
+function useMaxHistoryItems(): number {
+  const [maxItems, setMaxItems] = useState<number>(() => {
+    if (typeof window === "undefined") return 4;
+    const h = window.innerHeight;
+    const w = window.innerWidth;
+    if (h < 650 || w < 640) return 2;
+    if (h < 750) return 3;
+    if (h < 900) return 4;
+    if (h < 1080) return 5;
+    return 6;
+  });
+
+  useEffect(() => {
+    function calculateLimit() {
+      const h = window.innerHeight;
+      const w = window.innerWidth;
+      if (h < 650 || w < 640) setMaxItems(2);
+      else if (h < 750) setMaxItems(3);
+      else if (h < 900) setMaxItems(4);
+      else if (h < 1080) setMaxItems(5);
+      else setMaxItems(6);
+    }
+
+    calculateLimit();
+    window.addEventListener("resize", calculateLimit);
+    return () => window.removeEventListener("resize", calculateLimit);
+  }, []);
+
+  return maxItems;
+}
+
 export function HistoryPanel({
   entries,
   visible,
@@ -42,6 +73,12 @@ export function HistoryPanel({
 }: HistoryPanelProps) {
   const prevRef = useRef<RoomHistoryEntry[]>(entries);
   const [epoch, setEpoch] = useState(0);
+  const maxItems = useMaxHistoryItems();
+
+  const displayedEntries = useMemo(
+    () => entries.slice(0, maxItems),
+    [entries, maxItems]
+  );
 
   useEffect(() => {
     const prev = prevRef.current;
@@ -80,19 +117,19 @@ export function HistoryPanel({
   const cascading = epoch > 0;
 
   return (
-    <div className="flex flex-col w-56 sm:w-60 md:w-64 bg-black/85 border border-white/20 rounded-sm p-3 sm:p-4 max-h-[35vh] backdrop-blur-sm shadow-lg">
-      <div className="text-xs sm:text-small font-prompt text-muted-foreground uppercase tracking-wider mb-2 sm:mb-3">
+    <div className="flex flex-col w-56 sm:w-60 md:w-64 bg-black/85 border border-white/20 rounded-sm p-3 sm:p-4 backdrop-blur-sm shadow-lg overflow-hidden">
+      <div className="text-xs sm:text-small font-prompt text-muted-foreground uppercase tracking-wider mb-2 sm:mb-2.5">
         Histórico
       </div>
 
-      <div className="flex flex-col gap-1.5 pr-0.5 overflow-y-auto max-h-[22vh]">
-        {entries.length === 0 && (
-          <p className="text-caption text-muted-foreground font-prompt text-center py-2 sm:py-4">
+      <div className="flex flex-col gap-1.5 overflow-hidden">
+        {displayedEntries.length === 0 && (
+          <p className="text-caption text-muted-foreground font-prompt text-center py-2 sm:py-3">
             Nenhum sorteio realizado
           </p>
         )}
 
-        {entries.map((entry) =>
+        {displayedEntries.map((entry) =>
           cascading ? (
             <div
               key={`${epoch}-${entry.historyId}`}
@@ -112,7 +149,7 @@ export function HistoryPanel({
         type="button"
         onClick={onToggleVisible}
         className="
-          mt-2 sm:mt-3 flex items-center justify-center gap-1.5 sm:gap-2
+          mt-2.5 flex items-center justify-center gap-1.5 sm:gap-2
           text-[9px] sm:text-[10px] font-montserrat font-bold uppercase tracking-wider
           text-cyan-400/70 hover:text-cyan-300
           transition-colors cursor-pointer bg-transparent border-0
