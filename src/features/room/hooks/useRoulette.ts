@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { IAgent, IAgentAbilities } from "../../../types";
 import { fetchAgents } from "../../../infra/valorant/valorantService";
@@ -41,11 +41,24 @@ export function useRoulette({
 
   const [enabledAgents, setEnabledAgents] = useState<IAgent[]>([]);
   const [randomAgent, setRandomAgent] = useState("");
-  const [abilities, setAbilities] = useState<IAgentAbilities[]>([]);
+  const [abilitiesState, setAbilitiesState] = useState<IAgentAbilities[]>([]);
   const [descriptionAbility, setDescriptionAbility] = useState<
     IAgentAbilities | string
   >("");
   const [isSpinning, setIsSpinning] = useState(false);
+
+  const currentAgent = useMemo(
+    () => agents?.find((a) => a.uuid === randomAgent),
+    [agents, randomAgent]
+  );
+
+  const abilities = useMemo(
+    () =>
+      currentAgent?.abilities ??
+      (isMultiplayer ? roomState?.agentAbilities : undefined) ??
+      abilitiesState,
+    [currentAgent, isMultiplayer, roomState?.agentAbilities, abilitiesState]
+  );
 
   const spinRef = useRef<{ cancel: () => void } | null>(null);
 
@@ -100,7 +113,7 @@ export function useRoulette({
     if (!isMultiplayer || !roomState) return;
 
     setRandomAgent(roomState.agentUuid ?? "");
-    setAbilities(roomState.agentAbilities || []);
+    setAbilitiesState(roomState.agentAbilities || []);
     setDescriptionAbility(roomState.agentDescription ?? "");
     if (roomState.enabledAgents && agents) {
       const filtered = agents.filter((a) =>
@@ -143,7 +156,7 @@ export function useRoulette({
 
     if (remaining <= 100) {
       setRandomAgent(rollWinner);
-      if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+      if (roomState.agentAbilities) setAbilitiesState(roomState.agentAbilities);
       if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
 
       if (roomState.rollInitiatedBy === playerId) {
@@ -156,10 +169,13 @@ export function useRoulette({
     }
 
     const animation = createSpinAnimation(enabledAgents, {
-      onTick: (agent) => setRandomAgent(agent.uuid),
+      onTick: (agent) => {
+        setRandomAgent(agent.uuid);
+        setAbilitiesState(agent.abilities);
+      },
       onComplete: () => {
         setRandomAgent(rollWinner);
-        if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+        if (roomState.agentAbilities) setAbilitiesState(roomState.agentAbilities);
         if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
 
         if (roomState.rollInitiatedBy === playerId) {
@@ -199,10 +215,13 @@ export function useRoulette({
     setDescriptionAbility("");
 
     const animation = createSpinAnimation(enabledAgents, {
-      onTick: (agent) => setRandomAgent(agent.uuid),
+      onTick: (agent) => {
+        setRandomAgent(agent.uuid);
+        setAbilitiesState(agent.abilities);
+      },
       onComplete: (agent) => {
         setRandomAgent(agent.uuid);
-        setAbilities(agent.abilities);
+        setAbilitiesState(agent.abilities);
         recordSoloRoll(agent);
         setIsSpinning(false);
       },
@@ -265,6 +284,8 @@ export function useRoulette({
   const handleClickAgent = useCallback(() => {
     if (isMultiplayer && !canAct) return;
     setRandomAgent("");
+    setAbilitiesState([]);
+    setDescriptionAbility("");
 
     if (isMultiplayer) {
       syncToRoom!({
@@ -295,7 +316,7 @@ export function useRoulette({
   const getAgentAbilities = useCallback(
     (agentUuid: string) => {
       const result = agents?.find((a) => a.uuid === agentUuid);
-      if (result) setAbilities(result.abilities);
+      if (result) setAbilitiesState(result.abilities);
     },
     [agents]
   );
