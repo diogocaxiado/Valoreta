@@ -9,6 +9,7 @@ interface PlayerListProps {
   isHost?: boolean
   hostName?: string
   onTransferHost?: (newHostId: string) => void
+  isConnected?: boolean
 }
 
 export function PlayerList({
@@ -18,25 +19,65 @@ export function PlayerList({
   isHost,
   hostName,
   onTransferHost,
+  isConnected = true,
 }: PlayerListProps) {
   return (
     <div className="flex flex-col w-64 bg-black/80 border border-white/20 rounded-sm p-4">
-      <div className="text-small font-prompt text-muted-foreground uppercase tracking-wider mb-3">
-        Jogadores ({playerCount}/{MAX_PLAYERS})
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-small font-prompt text-muted-foreground uppercase tracking-wider">
+          Jogadores ({playerCount}/{MAX_PLAYERS})
+        </div>
+
+        <div className="relative group cursor-help">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/60 border border-white/10 hover:border-white/30 transition-colors">
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isConnected
+                  ? "bg-valorant-green shadow-[0_0_6px_rgba(30,255,60,0.8)]"
+                  : "bg-red-500 animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.8)]"
+              }`}
+            />
+            <span
+              className={`text-[10px] font-prompt uppercase font-semibold ${
+                isConnected ? "text-valorant-green" : "text-red-400"
+              }`}
+            >
+              {isConnected ? "Online" : "Offline"}
+            </span>
+          </div>
+
+          <div className="absolute right-0 top-full mt-2 hidden group-hover:flex flex-col items-end z-50 pointer-events-none w-52">
+            <div className="w-2 h-2 bg-black border-l border-t border-cyan-400/50 rotate-45 mr-3 -mb-1" />
+            <div className="bg-black/95 border border-cyan-400/50 text-white p-2.5 rounded-sm text-xs shadow-xl backdrop-blur-sm text-left font-prompt">
+              <strong className="block text-valorant-cyan font-bold uppercase tracking-wider text-[11px] mb-1">
+                {isConnected ? "Status: Conectado" : "Status: Desconectado"}
+              </strong>
+              <p className="text-white/70 text-[11px] leading-tight">
+                {isConnected
+                  ? "Sincronização em tempo real ativa com o servidor e os participantes da sala."
+                  : "A conexão com a sala foi interrompida. Tentando reconectar..."}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {isHost !== undefined && (
-        <div className={`flex items-center gap-1.5 px-2 py-1.5 mb-2 rounded-sm border ${
-          isHost
-            ? "border-valorant-yellow/30 bg-valorant-yellow/5"
-            : "border-white/10 bg-white/5"
-        }`}>
+        <div
+          className={`flex items-center gap-1.5 px-2 py-1.5 mb-2 rounded-sm border ${
+            isHost
+              ? "border-valorant-yellow/30 bg-valorant-yellow/5"
+              : "border-white/10 bg-white/5"
+          }`}
+        >
           <span className="text-[10px] font-montserrat font-bold uppercase tracking-wider text-white/50">
             Você é:
           </span>
-          <span className={`text-[10px] font-montserrat font-bold uppercase tracking-wider ${
-            isHost ? "text-valorant-yellow" : "text-white/60"
-          }`}>
+          <span
+            className={`text-[10px] font-montserrat font-bold uppercase tracking-wider ${
+              isHost ? "text-valorant-yellow" : "text-white/60"
+            }`}
+          >
             {isHost ? "👑 Host" : "👤 Participante"}
           </span>
         </div>

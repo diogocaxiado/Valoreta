@@ -306,14 +306,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         ) : (
           <Topbar title="Solo" />
         )}
-        {isMultiplayer && (
-          <span
-            className={`w-3 h-3 rounded-full ${
-              isPresenceConnected ? "bg-valorant-green" : "bg-red-500 animate-pulse"
-            }`}
-            title={isPresenceConnected ? "Conectado" : "Desconectado"}
-          />
-        )}
+
       </div>
 
       {isMultiplayer && (
@@ -325,6 +318,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             isHost={isHost}
             hostName={players.find((p) => p.isHost)?.name}
             onTransferHost={isHost ? handleTransferHost : undefined}
+            isConnected={isPresenceConnected}
           />
         </div>
       )}
