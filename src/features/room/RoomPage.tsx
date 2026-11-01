@@ -224,7 +224,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     <main className="flex flex-col justify-center w-screen h-screen">
       <Background type="video" src={BgScreen} />
 
-      <div className="flex justify-start absolute top-4 left-4 z-20">
+      <div className="flex justify-start absolute top-2 sm:top-4 left-2 sm:left-4 z-20">
         <ShadcnButton
           variant="outline"
           size="default"
@@ -234,7 +234,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             }
             navigate("/")
           }}
-          className="flex items-center gap-2 px-5 py-2 h-auto"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm h-auto"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           Voltar
@@ -246,20 +246,20 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           <div className="relative w-fit mx-auto">
             <div
               className="
-                flex items-center gap-3
-                px-6 py-2
+                flex items-center gap-2 sm:gap-3
+                px-3 sm:px-6 py-1 sm:py-2
                 border border-cyan-400 border-t-0
                 bg-gradient-to-b from-cyan-800/30 to-transparent
                 shadow-[0_0_15px_rgba(0,255,255,0.7)]
                 backdrop-blur-sm
               "
             >
-              <span className="text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
+              <span className="text-xs sm:text-base md:text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
                 Sala:
               </span>
-              <span className="text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
+              <span className="text-xs sm:text-base md:text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
                 <span className="invisible">{roomId}</span>
-                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-2xl" : "text-4xl"}`}>
+                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-xs sm:text-lg md:text-2xl" : "text-base sm:text-2xl md:text-4xl"}`}>
                   {codeVisible ? roomId : "•".repeat(roomId!.length)}
                 </span>
               </span>
@@ -310,7 +310,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
       </div>
 
       {isMultiplayer && (
-        <div className="absolute top-20 left-4 z-20">
+        <div className="absolute top-14 sm:top-16 md:top-20 left-2 sm:left-4 z-20">
           <PlayerList
             players={players}
             playerCount={playerCount}
@@ -376,7 +376,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         </>
       )}
 
-      <div className="absolute bottom-4 left-4 z-20">
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20">
         <HistoryPanel
           entries={history}
           visible={historyVisible}

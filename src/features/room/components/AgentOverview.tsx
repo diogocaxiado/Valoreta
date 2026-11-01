@@ -28,15 +28,15 @@ export function AgentOverview({
   }
 
   return (
-    <Card className="flex flex-col z-20 absolute top-4 right-2 w-1/4 p-6 border-2 border-white/50 bg-black/80 backdrop-blur-sm shadow-none">
-      <strong className="font-montserrat font-bold text-h4 uppercase tracking-widest text-valorant-cyan">
+    <Card className="flex flex-col z-20 absolute top-4 right-2 sm:right-4 w-72 sm:w-80 md:w-88 lg:w-96 xl:w-1/4 max-w-[85vw] xl:max-w-md p-3 sm:p-4 md:p-5 lg:p-6 border-2 border-white/50 bg-black/85 backdrop-blur-sm shadow-none max-h-[88vh] overflow-y-auto">
+      <strong className="font-montserrat font-bold text-xs sm:text-sm md:text-h4 uppercase tracking-widest text-valorant-cyan">
         {getAgentClass("displayName")}
       </strong>
-      <h2 className="text-6xl font-montserrat font-extrabold uppercase tracking-wide leading-none text-valorant-yellow">
+      <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-montserrat font-extrabold uppercase tracking-wide leading-none text-valorant-yellow break-words">
         {getAgentData("displayName")}
       </h2>
 
-      <div className="flex gap-0.5 my-5">
+      <div className="flex gap-0.5 my-2 sm:my-3 md:my-4 lg:my-5">
         <CardAbilities
           name="INFO"
           src={getAgentClass("displayIcon")}
@@ -57,16 +57,16 @@ export function AgentOverview({
             )
         )}
       </div>
-      <p className="break-words w-full font-prompt text-base font-semibold text-valorant-light">
+      <p className="break-words w-full font-prompt text-xs sm:text-sm md:text-base font-semibold text-valorant-light leading-relaxed">
         {typeof descriptionAbility === "object"
           ? descriptionAbility.description
           : getAgentClass("description")}
       </p>
 
-      <strong className="text-h4 font-montserrat my-4 font-bold uppercase tracking-wide text-white">
+      <strong className="text-xs sm:text-sm md:text-h4 font-montserrat my-2 sm:my-3 md:my-4 font-bold uppercase tracking-wide text-white">
         {getAgentClass("displayName")}
       </strong>
-      <p className="w-full font-prompt text-base text-left text-white">
+      <p className="w-full font-prompt text-xs sm:text-sm md:text-base text-left text-white leading-relaxed">
         {getAgentClass("description")}
       </p>
     </Card>

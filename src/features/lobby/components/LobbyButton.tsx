@@ -20,7 +20,7 @@ export function LobbyButton({
       type="button"
       onClick={onClick}
       className="
-        flex gap-4 p-4
+        flex items-center gap-3 sm:gap-4 p-3 sm:p-4
         border border-cyan-400 border-t-0 rounded-2xl
         bg-gradient-to-b from-cyan-800/30 to-transparent
         shadow-[0_0_15px_rgba(0,255,255,0.7)]
@@ -36,13 +36,13 @@ export function LobbyButton({
         w-full text-left
       "
     >
-      <IconComponent className="w-20 h-20 text-cyan-300 shrink-0" />
+      <IconComponent className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-cyan-300 shrink-0" />
 
-      <div className="flex flex-col gap-2 w-64">
-        <h3 className="text-xl text-white font-montserrat font-bold uppercase text-center">
+      <div className="flex flex-col gap-1 sm:gap-2 w-44 sm:w-56 md:w-64 min-w-0">
+        <h3 className="text-base sm:text-lg md:text-xl text-white font-montserrat font-bold uppercase text-center truncate">
           {title}
         </h3>
-        <p className="text-base text-white text-center font-prompt">
+        <p className="text-xs sm:text-sm md:text-base text-white text-center font-prompt">
           {description}
         </p>
       </div>
