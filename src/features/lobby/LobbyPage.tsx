@@ -9,7 +9,7 @@ import { CreateRoomModal } from "./components/CreateRoomModal"
 import { ShareRoomModal } from "./components/ShareRoomModal"
 import { PasswordModal } from "./components/PasswordModal"
 import { useRoomAccess } from "../../hooks/useRoomAccess"
-import { getPlayerName, setPlayerName } from "../../services/playerSession"
+import { getPlayerName } from "../../services/playerSession"
 import BgScreen from "../../assets/video/Valorant.mp4"
 
 export function LobbyPage() {
@@ -74,22 +74,22 @@ export function LobbyPage() {
     step.phase === "error" ? step.error : null
 
   return (
-    <main>
+    <main className="relative w-screen h-screen overflow-hidden flex flex-col justify-between">
       <Background type="video" src={BgScreen} />
 
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center relative z-10">
         <div className="py-4 px-8">
           <h1 className="text-display z-10 text-neon-blue font-valorant">
             vAloreta
           </h1>
         </div>
 
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-20">
           <Topbar title="Lobby" />
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-end p-8 min-h-[80vh]">
+      <div className="flex-1 flex flex-col justify-center items-end p-8 relative z-10">
         <div
           className="
             flex flex-col gap-8
@@ -157,28 +157,28 @@ export function LobbyPage() {
         </div>
       </div>
 
-        <CreateRoomModal
-          open={createModalOpen}
-          onOpenChange={(open) => {
-            setCreateModalOpen(open)
-            if (!open) reset()
-          }}
-          onConfirm={handleConfirmCreate}
-          loading={loading}
-        />
+      <CreateRoomModal
+        open={createModalOpen}
+        onOpenChange={(open) => {
+          setCreateModalOpen(open)
+          if (!open) reset()
+        }}
+        onConfirm={handleConfirmCreate}
+        loading={loading}
+      />
 
-        <ShareRoomModal
-          open={shareModalOpen}
-          onOpenChange={(open) => {
-            setShareModalOpen(open)
-            if (!open) {
-              // permite fechar sem navegar; sala já criada
-            }
-          }}
-          roomId={createdRoomId}
-          onGoToRoom={goToRoom}
-          loading={loading}
-        />
+      <ShareRoomModal
+        open={shareModalOpen}
+        onOpenChange={(open) => {
+          setShareModalOpen(open)
+          if (!open) {
+            // permite fechar sem navegar; sala já criada
+          }
+        }}
+        roomId={createdRoomId}
+        onGoToRoom={goToRoom}
+        loading={loading}
+      />
 
       {showPasswordModal && (
         <PasswordModal

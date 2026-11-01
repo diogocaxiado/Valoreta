@@ -223,7 +223,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         </ShadcnButton>
       </div>
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-20">
         {isMultiplayer ? (
           <div className="relative w-fit mx-auto">
             <div
@@ -304,7 +304,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
       <RouletteMessage randomAgent={randomAgent} isMultiplayer={isMultiplayer} isHost={isHost} />
 
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-4 relative z-10">
         <Button
           title="Rodar"
           variant="primary"
