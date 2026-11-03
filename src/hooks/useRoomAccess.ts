@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { createRoom, joinRoomAtomic, rejoinRoomAtomic, RoomFullError, RoomNotFoundError } from "../services/roomService"
+import { createRoom, joinRoomAtomic, rejoinRoomAtomic, setupPlayerPresence, RoomFullError, RoomNotFoundError } from "../services/roomService"
 import { validateRoomAccess, type RoomAccessError } from "../services/roomValidation"
 import { hashPassword, verifyPassword } from "../lib/hash"
 import {
@@ -24,7 +24,7 @@ export function useRoomAccess() {
   const [loading, setLoading] = useState(false)
 
   const handleCreateRoom = useCallback(
-    async (playerName: string, password: string) => {
+    async (playerName: string, password: string): Promise<string> => {
       setLoading(true)
       try {
         const roomId = crypto.randomUUID().slice(0, 8)
@@ -33,8 +33,8 @@ export function useRoomAccess() {
         const passwordHash = password ? await hashPassword(password) : ""
 
         await createRoom({ roomId, hostId, hostName: playerName, passwordHash })
-
-        navigate(`/room/${roomId}`)
+        setupPlayerPresence(roomId, hostId)
+        return roomId
       } catch {
         setStep({
           phase: "error",
@@ -43,11 +43,12 @@ export function useRoomAccess() {
             message: "Erro ao criar sala. Tente novamente.",
           },
         })
+        throw new Error("Erro ao criar sala")
       } finally {
         setLoading(false)
       }
     },
-    [navigate]
+    []
   )
 
   const handleJoinRoom = useCallback(

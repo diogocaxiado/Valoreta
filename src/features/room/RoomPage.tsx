@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
@@ -27,8 +27,10 @@ import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { RoomAccessGate } from "./components/RoomAccessGate";
+import { ShareRoomModal } from "../lobby/components/ShareRoomModal";
 import { leaveRoom, transferHost } from "../../services/roomService";
-import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon, LinkIcon, CheckIcon } from "@heroicons/react/24/solid";
+import { buildRoomShareUrl, copyToClipboard } from "../../lib/clipboard";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 interface RoomPageProps {
@@ -59,7 +61,11 @@ interface RoomLayoutProps {
 
 function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMultiplayer = mode === "multiplayer" && !!roomId;
+  const [shareModalOpen, setShareModalOpen] = useState(
+    Boolean(location.state?.isNewRoom)
+  );
 
   const { roomState, isConnected: isGameConnected, syncToRoom } = useRoom(
     isMultiplayer ? roomId : undefined,
@@ -81,6 +87,23 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     name: string;
   } | null>(null);
   const [codeVisible, setCodeVisible] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const handleCopyRoomUrl = useCallback(async () => {
+    if (!roomId) return;
+    const shareUrl = buildRoomShareUrl(roomId);
+    const ok = await copyToClipboard(shareUrl);
+    if (ok) {
+      setCopiedUrl(true);
+      toast.success("Link da sala copiado!", {
+        description: "Envie a URL para seus amigos entrarem na sala.",
+        duration: 4000,
+      });
+      setTimeout(() => setCopiedUrl(false), 2500);
+    } else {
+      toast.error("Não foi possível copiar o link.");
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
@@ -206,7 +229,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     <main className="flex flex-col justify-center w-screen h-screen">
       <Background type="video" src={BgScreen} />
 
-      <div className="flex justify-start absolute top-4 left-4 z-20">
+      <div className="flex justify-start absolute top-2 sm:top-4 left-2 sm:left-4 z-20">
         <ShadcnButton
           variant="outline"
           size="default"
@@ -216,32 +239,32 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             }
             navigate("/")
           }}
-          className="flex items-center gap-2 px-5 py-2 h-auto"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm h-auto"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           Voltar
         </ShadcnButton>
       </div>
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-20">
         {isMultiplayer ? (
           <div className="relative w-fit mx-auto">
             <div
               className="
-                flex items-center gap-3
-                px-6 py-2
+                flex items-center gap-2 sm:gap-3
+                px-3 sm:px-6 py-1 sm:py-2
                 border border-cyan-400 border-t-0
                 bg-gradient-to-b from-cyan-800/30 to-transparent
                 shadow-[0_0_15px_rgba(0,255,255,0.7)]
                 backdrop-blur-sm
               "
             >
-              <span className="text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
+              <span className="text-xs sm:text-base md:text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
                 Sala:
               </span>
-              <span className="text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
+              <span className="text-xs sm:text-base md:text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
                 <span className="invisible">{roomId}</span>
-                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-2xl" : "text-4xl"}`}>
+                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-xs sm:text-lg md:text-2xl" : "text-base sm:text-2xl md:text-4xl"}`}>
                   {codeVisible ? roomId : "•".repeat(roomId!.length)}
                 </span>
               </span>
@@ -257,23 +280,42 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
                   <EyeSlashIcon className="w-5 h-5" />
                 )}
               </button>
+              <button
+                type="button"
+                onClick={handleCopyRoomUrl}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-montserrat font-bold uppercase tracking-wider
+                  transition-all duration-150 cursor-pointer ml-1
+                  ${
+                    copiedUrl
+                      ? "bg-valorant-green/20 text-valorant-green border border-valorant-green/50 shadow-[0_0_10px_rgba(30,255,60,0.3)]"
+                      : "bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.2)]"
+                  }
+                `}
+                title="Copiar link da sala para enviar aos amigos"
+              >
+                {copiedUrl ? (
+                  <>
+                    <CheckIcon className="w-4 h-4 text-valorant-green" />
+                    <span>Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="w-4 h-4" />
+                    <span>Copiar link</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         ) : (
           <Topbar title="Solo" />
         )}
-        {isMultiplayer && (
-          <span
-            className={`w-3 h-3 rounded-full ${
-              isPresenceConnected ? "bg-valorant-green" : "bg-red-500 animate-pulse"
-            }`}
-            title={isPresenceConnected ? "Conectado" : "Desconectado"}
-          />
-        )}
+
       </div>
 
       {isMultiplayer && (
-        <div className="absolute top-20 left-4 z-20">
+        <div className="absolute top-14 sm:top-16 md:top-20 left-2 sm:left-4 z-20">
           <PlayerList
             players={players}
             playerCount={playerCount}
@@ -281,6 +323,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             isHost={isHost}
             hostName={players.find((p) => p.isHost)?.name}
             onTransferHost={isHost ? handleTransferHost : undefined}
+            isConnected={isPresenceConnected}
           />
         </div>
       )}
@@ -304,7 +347,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
 
       <RouletteMessage randomAgent={randomAgent} isMultiplayer={isMultiplayer} isHost={isHost} />
 
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-4 relative z-10">
         <Button
           title="Rodar"
           variant="primary"
@@ -338,7 +381,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         </>
       )}
 
-      <div className="absolute bottom-4 left-4 z-20">
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20">
         <HistoryPanel
           entries={history}
           visible={historyVisible}
@@ -375,6 +418,14 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {isMultiplayer && (
+        <ShareRoomModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          roomId={roomId || null}
+        />
+      )}
 
     </main>
   );
