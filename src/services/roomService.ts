@@ -455,7 +455,8 @@ export function subscribeRoomHistory(
   });
 }
 
-export const ROOM_INACTIVITY_TIMEOUT_MS = 60 * 1000;
+// Sala é considerada inativa se nenhum jogador enviou heartbeat nos últimos 5 minutos
+export const ROOM_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
 export function touchPlayerPresence(roomId: string, playerId: string) {
   const playerRef = ref(db, "room/" + roomId + "/players/" + playerId);

@@ -45,7 +45,11 @@ export default defineConfig({
         skipWaiting: true,
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        globIgnores: ['**/index-Djb3DaPx.js']
+        globIgnores: ['**/index-Djb3DaPx.js'],
+        // Garante que navegações diretas para rotas SPA (ex: /room/abc)
+        // sejam servidas pelo index.html via service worker
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//, /\.[a-zA-Z0-9]+$/],
       },
       devOptions: {
         enabled: true
