@@ -62,12 +62,12 @@ export async function validateRoomAccess(
     };
   }
 
-  if (playerId && data.players && data.players[playerId]) {
+  if (playerId && (data.hostId === playerId || (data.players && data.players[playerId]))) {
     return {
       valid: true,
       hasPassword: false,
       data,
-      alreadyInRoom: true,
+      alreadyInRoom: !!(data.players && data.players[playerId]),
     };
   }
 

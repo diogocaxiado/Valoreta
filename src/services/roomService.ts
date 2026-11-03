@@ -158,7 +158,7 @@ export async function joinRoomAtomic({
     currentPlayers[playerId] = {
       name: playerName,
       joinedAt: Date.now(),
-      isHost: false,
+      isHost: roomData.hostId === playerId,
     };
 
     return currentPlayers;
@@ -202,6 +202,9 @@ export async function rejoinRoomAtomic(
     if (currentPlayers[playerId]) {
       currentPlayers[playerId].name = playerName;
       currentPlayers[playerId].joinedAt = Date.now();
+      if (roomData.hostId === playerId) {
+        currentPlayers[playerId].isHost = true;
+      }
       return currentPlayers;
     }
 
@@ -215,7 +218,7 @@ export async function rejoinRoomAtomic(
     currentPlayers[playerId] = {
       name: playerName,
       joinedAt: Date.now(),
-      isHost: false,
+      isHost: roomData.hostId === playerId,
     };
 
     return currentPlayers;

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { createRoom, joinRoomAtomic, rejoinRoomAtomic, RoomFullError, RoomNotFoundError } from "../services/roomService"
+import { createRoom, joinRoomAtomic, rejoinRoomAtomic, setupPlayerPresence, RoomFullError, RoomNotFoundError } from "../services/roomService"
 import { validateRoomAccess, type RoomAccessError } from "../services/roomValidation"
 import { hashPassword, verifyPassword } from "../lib/hash"
 import {
@@ -33,6 +33,7 @@ export function useRoomAccess() {
         const passwordHash = password ? await hashPassword(password) : ""
 
         await createRoom({ roomId, hostId, hostName: playerName, passwordHash })
+        setupPlayerPresence(roomId, hostId)
         return roomId
       } catch {
         setStep({

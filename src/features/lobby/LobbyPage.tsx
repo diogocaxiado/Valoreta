@@ -6,7 +6,6 @@ import { Button } from "../../common/components/ui/button"
 import { Input } from "../../common/components/ui/input"
 import { LobbyButton } from "./components/LobbyButton"
 import { CreateRoomModal } from "./components/CreateRoomModal"
-import { ShareRoomModal } from "./components/ShareRoomModal"
 import { PasswordModal } from "./components/PasswordModal"
 import { useRoomAccess } from "../../hooks/useRoomAccess"
 import { getPlayerName } from "../../services/playerSession"
@@ -15,8 +14,6 @@ import BgScreen from "../../assets/video/Valorant.mp4"
 export function LobbyPage() {
   const navigate = useNavigate()
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [shareModalOpen, setShareModalOpen] = useState(false)
-  const [createdRoomId, setCreatedRoomId] = useState<string | null>(null)
   const [roomCode, setRoomCode] = useState("")
   const [nameInput, setNameInput] = useState(getPlayerName())
   const namePromptId = useId()
@@ -38,17 +35,11 @@ export function LobbyPage() {
   async function handleConfirmCreate(name: string, password: string) {
     try {
       const roomId = await handleCreateRoom(name, password)
-      setCreatedRoomId(roomId)
       setCreateModalOpen(false)
-      setShareModalOpen(true)
+      navigate(`/room/${roomId}`, { state: { isNewRoom: true } })
     } catch {
       // já tratado em useRoomAccess
     }
-  }
-
-  function goToRoom() {
-    if (!createdRoomId) return
-    navigate(`/room/${createdRoomId}`)
   }
 
   function handleOpenCreateModal() {
@@ -165,19 +156,6 @@ export function LobbyPage() {
           if (!open) reset()
         }}
         onConfirm={handleConfirmCreate}
-        loading={loading}
-      />
-
-      <ShareRoomModal
-        open={shareModalOpen}
-        onOpenChange={(open) => {
-          setShareModalOpen(open)
-          if (!open) {
-            // permite fechar sem navegar; sala já criada
-          }
-        }}
-        roomId={createdRoomId}
-        onGoToRoom={goToRoom}
         loading={loading}
       />
 

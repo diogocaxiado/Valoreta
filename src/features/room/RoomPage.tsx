@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
@@ -27,6 +27,7 @@ import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { RoomAccessGate } from "./components/RoomAccessGate";
+import { ShareRoomModal } from "../lobby/components/ShareRoomModal";
 import { leaveRoom, transferHost } from "../../services/roomService";
 import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon, LinkIcon, CheckIcon } from "@heroicons/react/24/solid";
 import { buildRoomShareUrl, copyToClipboard } from "../../lib/clipboard";
@@ -60,7 +61,11 @@ interface RoomLayoutProps {
 
 function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMultiplayer = mode === "multiplayer" && !!roomId;
+  const [shareModalOpen, setShareModalOpen] = useState(
+    Boolean(location.state?.isNewRoom)
+  );
 
   const { roomState, isConnected: isGameConnected, syncToRoom } = useRoom(
     isMultiplayer ? roomId : undefined,
@@ -413,6 +418,14 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {isMultiplayer && (
+        <ShareRoomModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          roomId={roomId || null}
+        />
+      )}
 
     </main>
   );
