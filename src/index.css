@@ -35,9 +35,14 @@
     @apply box-border m-0 p-0;
   }
 
+  html,
   body {
-    @apply font-prompt overflow-hidden;
+    @apply font-prompt overflow-hidden h-full w-full;
     background-color: black;
+  }
+
+  #root {
+    @apply h-full w-full overflow-hidden;
   }
 }
 
@@ -50,5 +55,14 @@
       0 0 10px #09086146,
       0 0 20px #09086121,
       0 0 40px #00ffff;
+  }
+}
+
+@keyframes history-cascade-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }

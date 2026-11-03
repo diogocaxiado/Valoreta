@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Input } from "../../../common/components/ui/input"
 import { Button } from "../../../common/components/ui/button"
 import { validateRoomAccess } from "../../../services/roomValidation"
-import { joinRoom, fetchRoomData } from "../../../services/roomService"
+import { joinRoomAtomic, fetchRoomData, RoomFullError, RoomNotFoundError } from "../../../services/roomService"
 import { getPlayerName, setPlayerName } from "../../../services/playerSession"
 import { verifyPassword } from "../../../lib/hash"
 
@@ -18,7 +18,7 @@ type GateStep =
   | { phase: "needs_name" }
   | { phase: "needs_password" }
   | { phase: "joining" }
-  | { phase: "error"; message: string }
+  | { phase: "error"; title: string; description?: string }
   | { phase: "authorized" }
 
 export function RoomAccessGate({
@@ -31,6 +31,7 @@ export function RoomAccessGate({
   const [nameInput, setNameInput] = useState(getPlayerName())
   const [passwordInput, setPasswordInput] = useState("")
   const [passwordError, setPasswordError] = useState("")
+  const [isJoining, setIsJoining] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -43,7 +44,7 @@ export function RoomAccessGate({
 
         if (!validation.valid) {
           const msg = validation.error?.message || "Sala indisponível."
-          setStep({ phase: "error", message: msg })
+          setStep({ phase: "error", title: msg })
           return
         }
 
@@ -63,15 +64,31 @@ export function RoomAccessGate({
           return
         }
 
-        await joinRoom({ roomId, playerId, playerName: savedName })
+        await joinRoomAtomic({ roomId, playerId, playerName: savedName })
         if (!cancelled) setStep({ phase: "authorized" })
-      } catch {
-        if (!cancelled) {
+      } catch (err) {
+        if (cancelled) return
+        if (err instanceof RoomFullError) {
           setStep({
             phase: "error",
-            message: "Erro ao verificar a sala. Tente novamente.",
+            title: `Sala cheia (${err.current}/${err.max})`,
+            description: "Aguarde a saída de um participante ou entre em outra sala.",
           })
+          return
         }
+        if (err instanceof RoomNotFoundError) {
+          setStep({
+            phase: "error",
+            title: "Sala não encontrada",
+            description: "Verifique o código e tente novamente.",
+          })
+          return
+        }
+        setStep({
+          phase: "error",
+          title: "Erro ao verificar a sala",
+          description: "Tente novamente.",
+        })
       }
     }
 
@@ -85,12 +102,21 @@ export function RoomAccessGate({
     setPlayerName(name)
     setStep({ phase: "joining" })
     try {
-      await joinRoom({ roomId, playerId, playerName: name })
+      await joinRoomAtomic({ roomId, playerId, playerName: name })
       setStep({ phase: "authorized" })
-    } catch {
+    } catch (err) {
+      if (err instanceof RoomFullError) {
+        setStep({
+          phase: "error",
+          title: `Sala cheia (${err.current}/${err.max})`,
+          description: "Aguarde a saída de um participante ou entre em outra sala.",
+        })
+        return
+      }
       setStep({
         phase: "error",
-        message: "Erro ao entrar na sala. Tente novamente.",
+        title: "Erro ao entrar na sala",
+        description: "Tente novamente.",
       })
     }
   }
@@ -100,13 +126,14 @@ export function RoomAccessGate({
     const password = passwordInput
     if (!name || !password) return
 
+    setIsJoining(true)
     setStep({ phase: "joining" })
     setPasswordError("")
 
     try {
       const room = await fetchRoomData(roomId)
       if (!room) {
-        setStep({ phase: "error", message: "Sala não encontrada." })
+        setStep({ phase: "error", title: "Sala não encontrada" })
         return
       }
 
@@ -116,15 +143,25 @@ export function RoomAccessGate({
       if (!valid) {
         setPasswordError("Senha incorreta.")
         setStep({ phase: "needs_password" })
+        setIsJoining(false)
         return
       }
 
       setPlayerName(name)
-      await joinRoom({ roomId, playerId, playerName: name })
+      await joinRoomAtomic({ roomId, playerId, playerName: name })
       setStep({ phase: "authorized" })
-    } catch {
+    } catch (err) {
+      if (err instanceof RoomFullError) {
+        setStep({
+          phase: "error",
+          title: `Sala cheia (${err.current}/${err.max})`,
+          description: "Aguarde a saída de um participante ou entre em outra sala.",
+        })
+        return
+      }
       setPasswordError("Erro ao validar senha.")
       setStep({ phase: "needs_password" })
+      setIsJoining(false)
     }
   }
 
@@ -140,10 +177,17 @@ export function RoomAccessGate({
 
   if (step.phase === "error") {
     return (
-      <main className="flex flex-col justify-center items-center w-screen h-screen bg-black gap-6">
-        <h1 className="text-h2 text-valorant-red font-montserrat font-bold uppercase tracking-widest text-center px-4">
-          {step.message}
-        </h1>
+      <main className="flex flex-col justify-center items-center w-screen h-screen bg-black gap-6 px-6">
+        <div className="flex flex-col items-center gap-3 max-w-md text-center">
+          <h1 className="text-h3 text-valorant-red font-montserrat font-bold uppercase tracking-widest">
+            {step.title}
+          </h1>
+          {step.description && (
+            <p className="text-body text-muted-foreground font-prompt leading-relaxed">
+              {step.description}
+            </p>
+          )}
+        </div>
         <Button variant="outline" size="lg" onClick={() => navigate("/")}>
           Voltar ao lobby
         </Button>
@@ -206,14 +250,14 @@ export function RoomAccessGate({
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               maxLength={24}
-              disabled={step.phase === "joining"}
+              disabled={isJoining}
             />
             <Input
               type="password"
               placeholder="Senha da sala"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
-              disabled={step.phase === "joining"}
+              disabled={isJoining}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && nameInput.trim() && passwordInput) {
                   handlePasswordSubmit()

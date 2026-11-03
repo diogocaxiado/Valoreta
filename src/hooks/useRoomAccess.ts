@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import { createRoom, joinRoom, rejoinRoom } from "../services/roomService"
+import { createRoom, joinRoomAtomic, rejoinRoomAtomic, setupPlayerPresence, RoomFullError, RoomNotFoundError } from "../services/roomService"
 import { validateRoomAccess, type RoomAccessError } from "../services/roomValidation"
 import { hashPassword, verifyPassword } from "../lib/hash"
 import {
@@ -24,7 +24,7 @@ export function useRoomAccess() {
   const [loading, setLoading] = useState(false)
 
   const handleCreateRoom = useCallback(
-    async (playerName: string, password: string) => {
+    async (playerName: string, password: string): Promise<string> => {
       setLoading(true)
       try {
         const roomId = crypto.randomUUID().slice(0, 8)
@@ -33,8 +33,8 @@ export function useRoomAccess() {
         const passwordHash = password ? await hashPassword(password) : ""
 
         await createRoom({ roomId, hostId, hostName: playerName, passwordHash })
-
-        navigate(`/room/${roomId}`)
+        setupPlayerPresence(roomId, hostId)
+        return roomId
       } catch {
         setStep({
           phase: "error",
@@ -43,11 +43,12 @@ export function useRoomAccess() {
             message: "Erro ao criar sala. Tente novamente.",
           },
         })
+        throw new Error("Erro ao criar sala")
       } finally {
         setLoading(false)
       }
     },
-    [navigate]
+    []
   )
 
   const handleJoinRoom = useCallback(
@@ -67,7 +68,7 @@ export function useRoomAccess() {
         if (validation.alreadyInRoom) {
           const playerName = getPlayerName()
           if (playerName) {
-            await rejoinRoom(roomId, playerId, playerName)
+            await rejoinRoomAtomic(roomId, playerId, playerName)
           }
           setStep({ phase: "success" })
           navigate(`/room/${roomId}`)
@@ -88,7 +89,19 @@ export function useRoomAccess() {
           roomId,
           playerId,
         })
-      } catch {
+      } catch (err) {
+        if (err instanceof RoomFullError) {
+          setStep({
+            phase: "error",
+            error: {
+              code: "ROOM_FULL",
+              message: `Esta sala já atingiu o limite máximo de ${err.max} participantes.`,
+              current: err.current,
+              max: err.max,
+            },
+          })
+          return
+        }
         setStep({
           phase: "error",
           error: {
@@ -109,10 +122,32 @@ export function useRoomAccess() {
       try {
         setPlayerName(playerName)
         setStep({ phase: "joining" })
-        await joinRoom({ roomId, playerId, playerName })
+        await joinRoomAtomic({ roomId, playerId, playerName })
         setStep({ phase: "success" })
         navigate(`/room/${roomId}`)
-      } catch {
+      } catch (err) {
+        if (err instanceof RoomFullError) {
+          setStep({
+            phase: "error",
+            error: {
+              code: "ROOM_FULL",
+              message: `Esta sala já atingiu o limite máximo de ${err.max} participantes. Aguarde a saída de um participante ou entre em outra sala.`,
+              current: err.current,
+              max: err.max,
+            },
+          })
+          return
+        }
+        if (err instanceof RoomNotFoundError) {
+          setStep({
+            phase: "error",
+            error: {
+              code: "ROOM_NOT_FOUND",
+              message: "Sala não encontrada.",
+            },
+          })
+          return
+        }
         setStep({
           phase: "name_prompt",
           roomId,
@@ -155,10 +190,32 @@ export function useRoomAccess() {
 
         setPlayerName(playerName)
         setStep({ phase: "joining" })
-        await joinRoom({ roomId, playerId, playerName })
+        await joinRoomAtomic({ roomId, playerId, playerName })
         setStep({ phase: "success" })
         navigate(`/room/${roomId}`)
-      } catch {
+      } catch (err) {
+        if (err instanceof RoomFullError) {
+          setStep({
+            phase: "error",
+            error: {
+              code: "ROOM_FULL",
+              message: `Esta sala já atingiu o limite máximo de ${err.max} participantes. Aguarde a saída de um participante ou entre em outra sala.`,
+              current: err.current,
+              max: err.max,
+            },
+          })
+          return
+        }
+        if (err instanceof RoomNotFoundError) {
+          setStep({
+            phase: "error",
+            error: {
+              code: "ROOM_NOT_FOUND",
+              message: "Sala não encontrada.",
+            },
+          })
+          return
+        }
         setStep({
           phase: "password_prompt",
           roomId,

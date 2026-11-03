@@ -1,24 +1,36 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoulette } from "./hooks/useRoulette";
 import { useRoom } from "../../hooks/useRoom";
 import { useRoomPresence } from "../../hooks/useRoomPresence";
+import { useRoomHistory } from "../../hooks/useRoomHistory";
 import { getPlayerId } from "../../services/playerSession";
 
 import { Background } from "../../common/components/Background/Background";
 import { Topbar } from "../../common/components/Topbar/Topbar";
 import { Button } from "../../common/components/Button/Button";
 import { Button as ShadcnButton } from "../../common/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "../../common/components/ui/dialog";
 import { AgentPortrait } from "./components/AgentPortrait";
 import { AgentOverview } from "./components/AgentOverview";
 import { RouletteMessage } from "./components/RouletteMessage";
 import { CardAgents } from "./components/CardAgents";
 import { RoleFilter } from "./components/RoleFilter";
 import { PlayerList } from "./components/PlayerList";
+import { HistoryPanel } from "./components/HistoryPanel";
 import { RoomAccessGate } from "./components/RoomAccessGate";
+import { ShareRoomModal } from "../lobby/components/ShareRoomModal";
 import { leaveRoom, transferHost } from "../../services/roomService";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, XMarkIcon, EyeIcon, EyeSlashIcon, LinkIcon, CheckIcon } from "@heroicons/react/24/solid";
+import { buildRoomShareUrl, copyToClipboard } from "../../lib/clipboard";
 import BgScreen from "../../assets/video/Valorant-2.mp4";
 
 interface RoomPageProps {
@@ -49,7 +61,11 @@ interface RoomLayoutProps {
 
 function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMultiplayer = mode === "multiplayer" && !!roomId;
+  const [shareModalOpen, setShareModalOpen] = useState(
+    Boolean(location.state?.isNewRoom)
+  );
 
   const { roomState, isConnected: isGameConnected, syncToRoom } = useRoom(
     isMultiplayer ? roomId : undefined,
@@ -59,46 +75,100 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
   const { players, playerCount, isConnected: isPresenceConnected, currentPlayer } =
     useRoomPresence(isMultiplayer ? roomId : undefined, isMultiplayer ? playerId : undefined);
 
+  const { history } = useRoomHistory(isMultiplayer ? roomId : undefined);
+
+  const [historyVisible, setHistoryVisible] = useState(true);
+
   const isHost = currentPlayer?.isHost ?? false;
   const notifiedRef = useRef(false);
+  const prevHostIdRef = useRef<string | null>(null);
+  const [transferTarget, setTransferTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [codeVisible, setCodeVisible] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const handleCopyRoomUrl = useCallback(async () => {
+    if (!roomId) return;
+    const shareUrl = buildRoomShareUrl(roomId);
+    const ok = await copyToClipboard(shareUrl);
+    if (ok) {
+      setCopiedUrl(true);
+      toast.success("Link da sala copiado!", {
+        description: "Envie a URL para seus amigos entrarem na sala.",
+        duration: 4000,
+      });
+      setTimeout(() => setCopiedUrl(false), 2500);
+    } else {
+      toast.error("Não foi possível copiar o link.");
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (isMultiplayer && currentPlayer && !isHost && !notifiedRef.current) {
       notifiedRef.current = true;
-      toast.info("Você entrou como participante. Somente o host pode iniciar a roleta e gerenciar os personagens do sorteio.", {
+      toast.info("Você entrou como Participante", {
+        description: "Somente o Host pode iniciar a roleta e gerenciar os personagens do sorteio.",
         duration: 6000,
       });
     }
   }, [isMultiplayer, currentPlayer, isHost]);
 
+  useEffect(() => {
+    if (!isMultiplayer || !players.length || !currentPlayer) return;
+
+    const currentHost = players.find((p) => p.isHost);
+    const currentHostId = currentHost?.id ?? null;
+
+    if (prevHostIdRef.current !== null && currentHostId !== prevHostIdRef.current) {
+      const newHost = players.find((p) => p.id === currentHostId);
+      const newHostName = newHost?.name ?? "Um jogador";
+
+      if (currentHostId === playerId) {
+        toast.success("Você agora é o Host da sala", {
+          description:
+            "Agora você pode iniciar a roleta, gerenciar os agentes participantes, alterar as configurações da sala e transferir o Host para outro jogador.",
+          duration: 8000,
+        });
+      } else if (prevHostIdRef.current === playerId) {
+        toast.success(`Host transferido para ${newHostName}`, {
+          description: "Agora você participa da sala como um jogador comum.",
+          duration: 8000,
+        });
+      } else {
+        toast.info(`${newHostName} agora é o novo Host da sala.`, {
+          duration: 6000,
+        });
+      }
+    }
+
+    if (currentHostId !== null) {
+      prevHostIdRef.current = currentHostId;
+    }
+  }, [isMultiplayer, players, currentPlayer, playerId]);
+
   const handleTransferHost = useCallback((newHostId: string) => {
     if (!roomId || !playerId) return;
-
     const targetPlayer = players.find((p) => p.id === newHostId);
     const targetName = targetPlayer?.name || "jogador";
-
-    toast(`Deseja transferir a liderança da sala para ${targetName}?`, {
-      duration: 8000,
-      action: {
-        label: "Confirmar",
-        onClick: async () => {
-          try {
-            await transferHost(roomId, playerId, newHostId);
-            toast.success(`${targetName} agora é o Host da Sala`);
-          } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
-          }
-        },
-      },
-      cancel: {
-        label: "Cancelar",
-        onClick: () => {},
-      },
-    });
+    setTransferTarget({ id: newHostId, name: targetName });
   }, [roomId, playerId, players]);
+
+  const handleConfirmTransfer = useCallback(async () => {
+    if (!roomId || !playerId || !transferTarget) return;
+    try {
+      await transferHost(roomId, playerId, transferTarget.id);
+      setTransferTarget(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao transferir host");
+      setTransferTarget(null);
+    }
+  }, [roomId, playerId, transferTarget]);
 
   const { state, actions } = useRoulette({
     mode,
+    roomId: isMultiplayer ? roomId : undefined,
     roomState,
     syncToRoom: isMultiplayer ? syncToRoom : undefined,
     playerId: isMultiplayer ? playerId : undefined,
@@ -159,7 +229,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
     <main className="flex flex-col justify-center w-screen h-screen">
       <Background type="video" src={BgScreen} />
 
-      <div className="flex justify-start absolute top-4 left-4 z-20">
+      <div className="flex justify-start absolute top-2 sm:top-4 left-2 sm:left-4 z-20">
         <ShadcnButton
           variant="outline"
           size="default"
@@ -169,32 +239,91 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             }
             navigate("/")
           }}
-          className="flex items-center gap-2 px-5 py-2 h-auto"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm h-auto"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           Voltar
         </ShadcnButton>
       </div>
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-        <Topbar title={isMultiplayer ? `Sala: ${roomId}` : "Solo"} />
-        {isMultiplayer && (
-          <span
-            className={`w-3 h-3 rounded-full ${
-              isPresenceConnected ? "bg-valorant-green" : "bg-red-500 animate-pulse"
-            }`}
-            title={isPresenceConnected ? "Conectado" : "Desconectado"}
-          />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-20">
+        {isMultiplayer ? (
+          <div className="relative w-fit mx-auto">
+            <div
+              className="
+                flex items-center gap-2 sm:gap-3
+                px-3 sm:px-6 py-1 sm:py-2
+                border border-cyan-400 border-t-0
+                bg-gradient-to-b from-cyan-800/30 to-transparent
+                shadow-[0_0_15px_rgba(0,255,255,0.7)]
+                backdrop-blur-sm
+              "
+            >
+              <span className="text-xs sm:text-base md:text-h4 text-white font-montserrat font-bold uppercase whitespace-nowrap">
+                Sala:
+              </span>
+              <span className="text-xs sm:text-base md:text-h4 text-valorant-cyan font-montserrat font-bold uppercase tracking-widest relative inline-block">
+                <span className="invisible">{roomId}</span>
+                <span className={`absolute inset-0 flex items-center ${codeVisible ? "text-xs sm:text-lg md:text-2xl" : "text-base sm:text-2xl md:text-4xl"}`}>
+                  {codeVisible ? roomId : "•".repeat(roomId!.length)}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setCodeVisible((v) => !v)}
+                className="text-white/50 hover:text-white transition-colors p-1 rounded-sm cursor-pointer"
+                title={codeVisible ? "Ocultar código da sala" : "Mostrar código da sala"}
+              >
+                {codeVisible ? (
+                  <EyeIcon className="w-5 h-5" />
+                ) : (
+                  <EyeSlashIcon className="w-5 h-5" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyRoomUrl}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-montserrat font-bold uppercase tracking-wider
+                  transition-all duration-150 cursor-pointer ml-1
+                  ${
+                    copiedUrl
+                      ? "bg-valorant-green/20 text-valorant-green border border-valorant-green/50 shadow-[0_0_10px_rgba(30,255,60,0.3)]"
+                      : "bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 hover:text-white border border-cyan-400/40 hover:border-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.2)]"
+                  }
+                `}
+                title="Copiar link da sala para enviar aos amigos"
+              >
+                {copiedUrl ? (
+                  <>
+                    <CheckIcon className="w-4 h-4 text-valorant-green" />
+                    <span>Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="w-4 h-4" />
+                    <span>Copiar link</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Topbar title="Solo" />
         )}
+
       </div>
 
       {isMultiplayer && (
-        <div className="absolute top-20 left-4 z-20">
+        <div className="absolute top-14 sm:top-16 md:top-20 left-2 sm:left-4 z-20">
           <PlayerList
             players={players}
             playerCount={playerCount}
             currentPlayerId={playerId}
+            isHost={isHost}
+            hostName={players.find((p) => p.isHost)?.name}
             onTransferHost={isHost ? handleTransferHost : undefined}
+            isConnected={isPresenceConnected}
           />
         </div>
       )}
@@ -216,15 +345,16 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
         />
       )}
 
-      <RouletteMessage randomAgent={randomAgent} />
+      <RouletteMessage randomAgent={randomAgent} isMultiplayer={isMultiplayer} isHost={isHost} />
 
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-4 relative z-10">
         <Button
           title="Rodar"
           variant="primary"
           onClick={handleClickButton}
           disabled={enabledAgents.length === 0 || (isMultiplayer && !canAct)}
           loading={isSpinning}
+          restricted={isMultiplayer && !canAct}
           tooltip={isMultiplayer && !canAct ? "Apenas o host da sala pode executar esta ação." : undefined}
         />
       </div>
@@ -238,6 +368,7 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             handleClickAgent={handleClickAgent}
             handleEnabledAgent={handleEnabledAgent}
             canInteract={canAct}
+            isSpinning={isSpinning}
           />
 
           <RoleFilter
@@ -245,8 +376,55 @@ function RoomLayout({ mode, roomId, playerId }: RoomLayoutProps) {
             enabledAgents={enabledAgents}
             onRoleToggle={handleRoleToggle}
             canInteract={canAct}
+            hasResult={!!randomAgent}
           />
         </>
+      )}
+
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20">
+        <HistoryPanel
+          entries={history}
+          visible={historyVisible}
+          onToggleVisible={() => setHistoryVisible((v) => !v)}
+        />
+      </div>
+
+      <Dialog open={transferTarget !== null} onOpenChange={(open) => { if (!open) setTransferTarget(null); }}>
+        <DialogContent className="border-cyan-400/50">
+          <DialogHeader>
+            <DialogTitle>Transferir Host</DialogTitle>
+          </DialogHeader>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <XMarkIcon className="w-5 h-5" />
+          </DialogClose>
+          <DialogDescription className="my-6">
+            Deseja transferir o Host da sala para <strong>{transferTarget?.name}</strong>?
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <ShadcnButton
+              variant="outline"
+              size="default"
+              onClick={() => setTransferTarget(null)}
+            >
+              Cancelar
+            </ShadcnButton>
+            <ShadcnButton
+              variant="default"
+              size="default"
+              onClick={handleConfirmTransfer}
+            >
+              Confirmar
+            </ShadcnButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {isMultiplayer && (
+        <ShareRoomModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          roomId={roomId || null}
+        />
       )}
 
     </main>

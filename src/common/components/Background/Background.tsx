@@ -10,7 +10,7 @@ export function Background({
   overlay = false,
 }: BackgroundProps) {
   return (
-    <section className="absolute top-0 left-0 w-full h-full z-[-1] overflow-hidden">
+    <section className="fixed inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
       {type === "image" ? (
         <img
           src={src}
@@ -18,7 +18,7 @@ export function Background({
           className="w-full h-full object-cover"
         />
       ) : (
-        <video autoPlay loop muted className="w-full h-full object-cover">
+        <video autoPlay loop muted playsInline className="w-full h-full object-cover">
           <source src={src} type="video/mp4" />
         </video>
       )}

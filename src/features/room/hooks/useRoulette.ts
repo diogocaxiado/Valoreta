@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { IAgent, IAgentAbilities } from "../../../types";
 import { fetchAgents } from "../../../infra/valorant/valorantService";
 import { createSpinAnimation } from "../utils/spinEngine";
-import { RoomState } from "../../../services/roomService";
+import { RoomState, recordRoomHistory, RoomHistoryEntry } from "../../../services/roomService";
+import { recordSoloHistory } from "../../../services/soloHistory";
 
 interface UseRouletteOptions {
   mode: "solo" | "multiplayer";
+  roomId?: string;
   roomState?: RoomState | null;
   syncToRoom?: (data: Partial<RoomState>) => void;
   playerId?: string;
@@ -17,6 +19,7 @@ const ROLL_DURATION = 2000;
 
 export function useRoulette({
   mode,
+  roomId,
   roomState,
   syncToRoom,
   playerId,
@@ -38,13 +41,67 @@ export function useRoulette({
 
   const [enabledAgents, setEnabledAgents] = useState<IAgent[]>([]);
   const [randomAgent, setRandomAgent] = useState("");
-  const [abilities, setAbilities] = useState<IAgentAbilities[]>([]);
+  const [abilitiesState, setAbilitiesState] = useState<IAgentAbilities[]>([]);
   const [descriptionAbility, setDescriptionAbility] = useState<
     IAgentAbilities | string
   >("");
   const [isSpinning, setIsSpinning] = useState(false);
 
+  const currentAgent = useMemo(
+    () => agents?.find((a) => a.uuid === randomAgent),
+    [agents, randomAgent]
+  );
+
+  const abilities = useMemo(
+    () =>
+      currentAgent?.abilities ??
+      (isMultiplayer ? roomState?.agentAbilities : undefined) ??
+      abilitiesState,
+    [currentAgent, isMultiplayer, roomState?.agentAbilities, abilitiesState]
+  );
+
   const spinRef = useRef<{ cancel: () => void } | null>(null);
+
+  const recordRoll = useCallback(
+    (
+      winner: IAgent,
+      rollState: Pick<RoomState, "rollId" | "rollStartedAt" | "rollInitiatedBy">
+    ) => {
+      if (!isMultiplayer || !roomId) return;
+      if (!rollState.rollInitiatedBy || rollState.rollInitiatedBy !== playerId) return;
+
+      const historyId =
+        rollState.rollId ||
+        `legacy_${rollState.rollStartedAt ?? Date.now()}_${rollState.rollInitiatedBy}`;
+
+      const entry: RoomHistoryEntry = {
+        historyId,
+        agentUuid: winner.uuid,
+        agentName: winner.displayName,
+        agentIcon: winner.displayIcon,
+        rolledAt: (rollState.rollStartedAt ?? Date.now()) + ROLL_DURATION,
+        rolledBy: rollState.rollInitiatedBy,
+      };
+
+      recordRoomHistory(roomId, entry).catch((err) => {
+        console.error("Falha ao salvar histórico do sorteio", err);
+      });
+    },
+    [isMultiplayer, roomId, playerId]
+  );
+
+  const recordSoloRoll = useCallback((winner: IAgent) => {
+    const entry: RoomHistoryEntry = {
+      historyId: `solo_${crypto.randomUUID()}`,
+      agentUuid: winner.uuid,
+      agentName: winner.displayName,
+      agentIcon: winner.displayIcon,
+      rolledAt: Date.now(),
+      rolledBy: "solo",
+    };
+
+    recordSoloHistory(entry);
+  }, []);
 
   useEffect(() => {
     if (agents) {
@@ -56,7 +113,7 @@ export function useRoulette({
     if (!isMultiplayer || !roomState) return;
 
     setRandomAgent(roomState.agentUuid ?? "");
-    setAbilities(roomState.agentAbilities || []);
+    setAbilitiesState(roomState.agentAbilities || []);
     setDescriptionAbility(roomState.agentDescription ?? "");
     if (roomState.enabledAgents && agents) {
       const filtered = agents.filter((a) =>
@@ -99,11 +156,12 @@ export function useRoulette({
 
     if (remaining <= 100) {
       setRandomAgent(rollWinner);
-      if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+      if (roomState.agentAbilities) setAbilitiesState(roomState.agentAbilities);
       if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
 
       if (roomState.rollInitiatedBy === playerId) {
         syncToRoom!({ rolling: false });
+        recordRoll(winnerAgent, roomState);
       }
 
       setIsSpinning(false);
@@ -111,14 +169,18 @@ export function useRoulette({
     }
 
     const animation = createSpinAnimation(enabledAgents, {
-      onTick: (agent) => setRandomAgent(agent.uuid),
+      onTick: (agent) => {
+        setRandomAgent(agent.uuid);
+        setAbilitiesState(agent.abilities);
+      },
       onComplete: () => {
         setRandomAgent(rollWinner);
-        if (roomState.agentAbilities) setAbilities(roomState.agentAbilities);
+        if (roomState.agentAbilities) setAbilitiesState(roomState.agentAbilities);
         if (roomState.agentDescription) setDescriptionAbility(roomState.agentDescription);
 
         if (roomState.rollInitiatedBy === playerId) {
           syncToRoom!({ rolling: false });
+          recordRoll(winnerAgent, roomState);
         }
 
         setIsSpinning(false);
@@ -126,7 +188,7 @@ export function useRoulette({
     }, winnerAgent);
 
     spinRef.current = animation;
-  }, [roomState?.rolling, roomState?.rollWinner, agents, isMultiplayer, syncToRoom, playerId, enabledAgents]);
+  }, [roomState?.rolling, roomState?.rollWinner, agents, isMultiplayer, syncToRoom, playerId, enabledAgents, recordRoll]);
 
   const handleClickButton = useCallback(() => {
     if (!enabledAgents.length || isSpinning) return;
@@ -137,6 +199,7 @@ export function useRoulette({
 
       syncToRoom!({
         rolling: true,
+        rollId: crypto.randomUUID(),
         rollWinner: winner.uuid,
         rollStartedAt: Date.now(),
         rollInitiatedBy: playerId,
@@ -152,10 +215,14 @@ export function useRoulette({
     setDescriptionAbility("");
 
     const animation = createSpinAnimation(enabledAgents, {
-      onTick: (agent) => setRandomAgent(agent.uuid),
+      onTick: (agent) => {
+        setRandomAgent(agent.uuid);
+        setAbilitiesState(agent.abilities);
+      },
       onComplete: (agent) => {
         setRandomAgent(agent.uuid);
-        setAbilities(agent.abilities);
+        setAbilitiesState(agent.abilities);
+        recordSoloRoll(agent);
         setIsSpinning(false);
       },
     });
@@ -176,6 +243,7 @@ export function useRoulette({
   const handleEnabledAgent = useCallback(
     (agent: IAgent) => {
       if (isMultiplayer && !canAct) return;
+      if (randomAgent) return;
 
       const isEnabled = enabledAgents.some((item) => item.uuid === agent.uuid);
 
@@ -185,12 +253,13 @@ export function useRoulette({
 
       syncEnabled(updated);
     },
-    [enabledAgents, isMultiplayer, canAct, syncEnabled]
+    [enabledAgents, isMultiplayer, canAct, randomAgent, syncEnabled]
   );
 
   const handleRoleToggle = useCallback(
     (roleName: string) => {
       if (isMultiplayer && !canAct) return;
+      if (randomAgent) return;
       if (!agents) return;
 
       const roleAgents = agents.filter((a) => a.role.displayName === roleName);
@@ -209,12 +278,14 @@ export function useRoulette({
         syncEnabled([...enabledAgents, ...roleAgents.filter((a) => !existing.has(a.uuid))]);
       }
     },
-    [agents, enabledAgents, isMultiplayer, canAct, syncEnabled]
+    [agents, enabledAgents, isMultiplayer, canAct, randomAgent, syncEnabled]
   );
 
   const handleClickAgent = useCallback(() => {
     if (isMultiplayer && !canAct) return;
     setRandomAgent("");
+    setAbilitiesState([]);
+    setDescriptionAbility("");
 
     if (isMultiplayer) {
       syncToRoom!({
@@ -245,7 +316,7 @@ export function useRoulette({
   const getAgentAbilities = useCallback(
     (agentUuid: string) => {
       const result = agents?.find((a) => a.uuid === agentUuid);
-      if (result) setAbilities(result.abilities);
+      if (result) setAbilitiesState(result.abilities);
     },
     [agents]
   );

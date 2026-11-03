@@ -6,6 +6,7 @@ interface RoleFilterProps {
   enabledAgents: IAgent[];
   onRoleToggle: (roleName: string) => void;
   canInteract?: boolean;
+  hasResult?: boolean;
 }
 
 interface RoleInfo {
@@ -20,6 +21,7 @@ export function RoleFilter({
   enabledAgents,
   onRoleToggle,
   canInteract = true,
+  hasResult = false,
 }: RoleFilterProps) {
   const roles = useMemo(() => {
     const map = new Map<string, RoleInfo>();
@@ -48,14 +50,14 @@ export function RoleFilter({
   }, [agents, enabledAgents]);
 
   return (
-    <section className="flex justify-center items-center relative z-10 mt-4">
-      <div className="flex flex-wrap justify-center gap-2">
+    <section className="flex justify-center items-center relative z-10 mt-2 sm:mt-3 md:mt-4 px-2">
+      <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
         {roles.map((role) => {
           const allEnabled = role.enabledCount === role.total;
           const noneEnabled = role.enabledCount === 0;
 
           let btnClass =
-            "flex items-center gap-2 px-3 py-1.5 rounded border-2 transition-all duration-200 ";
+            "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded border-2 transition-all duration-200 ";
 
           if (allEnabled) {
             btnClass +=
@@ -68,19 +70,23 @@ export function RoleFilter({
               "border-yellow-500 bg-white/5 text-white/80 opacity-80";
           }
 
-          if (canInteract) {
+          if (hasResult) {
+            btnClass += " cursor-not-allowed opacity-50";
+          } else if (canInteract) {
             btnClass += " cursor-pointer hover:scale-105 hover:brightness-110";
           } else {
-            btnClass += " cursor-default";
+            btnClass += " cursor-default grayscale opacity-50 select-none";
           }
 
           return (
             <button
               key={role.displayName}
               className={btnClass}
-              onClick={() => canInteract && onRoleToggle(role.displayName)}
+              onClick={() => canInteract && !hasResult && onRoleToggle(role.displayName)}
               title={
-                allEnabled
+                !canInteract
+                  ? "Apenas o Host pode alterar os filtros"
+                  : allEnabled
                   ? `Desabilitar todos ${role.displayName}`
                   : `Habilitar todos ${role.displayName}`
               }
@@ -88,21 +94,10 @@ export function RoleFilter({
               <img
                 src={role.displayIcon}
                 alt={role.displayName}
-                className="w-5 h-5"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 object-contain"
               />
-              <span className="text-xs font-montserrat font-bold uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-montserrat font-bold uppercase tracking-wider">
                 {role.displayName}
-              </span>
-              <span
-                className={`text-[10px] font-mono ${
-                  allEnabled
-                    ? "text-valorant-green"
-                    : noneEnabled
-                    ? "text-white/30"
-                    : "text-yellow-400"
-                }`}
-              >
-                {role.enabledCount}/{role.total}
               </span>
             </button>
           );

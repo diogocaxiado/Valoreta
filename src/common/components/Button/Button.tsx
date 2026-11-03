@@ -1,4 +1,5 @@
 import { Button as ShadcnButton } from "../ui/button"
+import { LockClosedIcon } from "@heroicons/react/24/solid"
 
 interface ButtonProps {
   title: string
@@ -8,6 +9,7 @@ interface ButtonProps {
   loading?: boolean
   className?: string
   tooltip?: string
+  restricted?: boolean
 }
 
 export function Button({
@@ -18,6 +20,7 @@ export function Button({
   loading,
   className,
   tooltip,
+  restricted,
 }: ButtonProps) {
   const shadcnVariant = variant === "primary" ? "default" : "secondary"
 
@@ -33,8 +36,9 @@ export function Button({
           disabled={disabled}
           loading={loading}
           onClick={onClick}
-          className={className}
+          className={`${restricted ? "opacity-40 cursor-not-allowed" : ""} ${className ?? ""}`}
         >
+          {restricted && <LockClosedIcon className="w-4 h-4 mr-1.5" />}
           {title}
         </ShadcnButton>
 

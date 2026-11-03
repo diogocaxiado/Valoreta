@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react"
-import { ref, set } from "firebase/database"
-import { db } from "../infra/firebase/config"
 import {
   subscribeRoomPlayers,
   setupPlayerPresence,
   cancelPresence,
   leaveRoom,
-  fetchRoomData,
+  autoRejoinAtomic,
+  touchPlayerPresence,
   type PlayerData,
 } from "../services/roomService"
 import { getPlayerName } from "../services/playerSession"
@@ -15,7 +14,34 @@ export interface PlayerInfo {
   id: string
   name: string
   joinedAt: number
+  lastSeen?: number
   isHost: boolean
+}
+
+// Contador de abas ativas para o mesmo jogador+sala usando BroadcastChannel
+// Isso evita remoção do jogador ao fechar uma aba enquanto outra aba ainda está aberta.
+function getActiveTabKey(roomId: string, playerId: string) {
+  return `valoreta_tabs_${roomId}_${playerId}`
+}
+
+function registerTab(roomId: string, playerId: string): () => void {
+  const key = getActiveTabKey(roomId, playerId)
+
+  // Incrementa contador de abas ativas
+  const current = parseInt(localStorage.getItem(key) || "0", 10)
+  localStorage.setItem(key, String(current + 1))
+
+  return () => {
+    const count = parseInt(localStorage.getItem(key) || "1", 10)
+    const next = Math.max(0, count - 1)
+    localStorage.setItem(key, String(next))
+  }
+}
+
+function isLastTab(roomId: string, playerId: string): boolean {
+  const key = getActiveTabKey(roomId, playerId)
+  const count = parseInt(localStorage.getItem(key) || "1", 10)
+  return count <= 1
 }
 
 export function useRoomPresence(
@@ -37,7 +63,28 @@ export function useRoomPresence(
     setIsConnected(true)
     const presence = setupPlayerPresence(roomId, playerId)
 
-    const unsubscribe = subscribeRoomPlayers(roomId, (data) => {
+    // Registra esta aba como ativa
+    const unregisterTab = registerTab(roomId, playerId)
+
+    // Heartbeat periódico (a cada 15 segundos) para manter presença ativa na sala
+    touchPlayerPresence(roomId, playerId)
+    const heartbeatInterval = setInterval(() => {
+      touchPlayerPresence(roomId, playerId)
+    }, 15000)
+
+    // Remove o jogador do Firebase SOMENTE se esta for a última aba aberta
+    // para este jogador nesta sala.
+    function handleBeforeUnload() {
+      if (isLastTab(roomId!, playerId!)) {
+        // Usa sendBeacon ou remoção síncrona — a chamada assíncrona pode não completar,
+        // mas o mecanismo de lastSeen vai limpar a sala após 60s de inatividade de qualquer forma.
+        leaveRoom(roomId!, playerId!).catch(() => {})
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
+    const unsubscribe = subscribeRoomPlayers(roomId, async (data) => {
       if (!data) {
         setPlayers([])
         return
@@ -49,14 +96,7 @@ export function useRoomPresence(
         rejoinedOnce.current = true
         const playerName = getPlayerName()
         if (playerName) {
-          fetchRoomData(roomId).then((room) => {
-            const shouldBeHost = room?.hostId === playerId
-            set(ref(db, `room/${roomId}/players/${playerId}`), {
-              name: playerName,
-              joinedAt: Date.now(),
-              isHost: shouldBeHost,
-            })
-          })
+          await autoRejoinAtomic(roomId, playerId, playerName)
         }
       }
 
@@ -65,6 +105,7 @@ export function useRoomPresence(
           id,
           name: p.name,
           joinedAt: p.joinedAt,
+          lastSeen: p.lastSeen,
           isHost: p.isHost,
         }))
         .sort((a, b) => a.joinedAt - b.joinedAt)
@@ -73,8 +114,12 @@ export function useRoomPresence(
     })
 
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+      clearInterval(heartbeatInterval)
       unsubscribe()
       cancelPresence(roomId, playerId)
+      // Decrementa contador de abas ao desmontar (navegação interna)
+      unregisterTab()
     }
   }, [roomId, playerId])
 
