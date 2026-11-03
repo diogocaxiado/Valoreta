@@ -1,4 +1,4 @@
-import { fetchRoomData, RoomData, MAX_PLAYERS, deleteRoom } from "./roomService";
+import { fetchRoomData, RoomData, MAX_PLAYERS, deleteRoom, ROOM_INACTIVITY_TIMEOUT_MS } from "./roomService";
 
 export type RoomAccessError =
   | { code: "ROOM_NOT_FOUND"; message: string }
@@ -54,6 +54,22 @@ export async function validateRoomAccess(
   }
 
   if (!data.players || Object.keys(data.players).length === 0) {
+    await deleteRoom(roomId);
+    return {
+      valid: false,
+      error: roomNotFoundError(),
+      hasPassword: false,
+    };
+  }
+
+  const now = Date.now();
+  const playerEntries = Object.entries(data.players);
+  const hasActivePlayer = playerEntries.some(([, p]) => {
+    const lastActivity = p.lastSeen || p.joinedAt || 0;
+    return now - lastActivity < ROOM_INACTIVITY_TIMEOUT_MS;
+  });
+
+  if (!hasActivePlayer && data.hostId !== playerId) {
     await deleteRoom(roomId);
     return {
       valid: false,

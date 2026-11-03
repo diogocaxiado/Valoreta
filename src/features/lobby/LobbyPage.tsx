@@ -101,8 +101,8 @@ export function LobbyPage() {
           <LobbyButton
             onClick={handleOpenCreateModal}
             icon="group"
-            title="Criar sala"
-            description="Compartilhe o código com amigos"
+            title="Salas multiplayer"
+            description="Crie ou encontre salas online"
           />
 
           <div className="border-t border-cyan-400/30 pt-3 sm:pt-4">
@@ -156,6 +156,10 @@ export function LobbyPage() {
           if (!open) reset()
         }}
         onConfirm={handleConfirmCreate}
+        onJoinRoom={(roomId) => {
+          setCreateModalOpen(false)
+          handleJoinRoom(roomId)
+        }}
         loading={loading}
       />
 
